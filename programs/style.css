@@ -28,13 +28,14 @@ header {
   margin-bottom: 1rem;
 }
 
-.frontpage {
+body {
   background: gray;
   font-family: monospace;
 }
 
 main {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   max-width: 1000px;
   margin: 0 auto;
   padding: 1rem;
@@ -89,4 +90,9 @@ h1 {
   height: 100vh;
   justify-content: center;
   align-items: center;
+}
+
+.container canvas  {
+  border: 5px solid black;
+  border-radius: 1rem;
 }
