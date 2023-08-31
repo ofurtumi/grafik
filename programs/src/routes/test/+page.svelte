@@ -91,12 +91,6 @@
     justify-content: space-between;
   }
 
-  .matrix_grid {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-  }
-
   .matrix_cell {
     display: flex;
     gap: 1rem;
