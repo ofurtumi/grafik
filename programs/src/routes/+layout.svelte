@@ -77,6 +77,7 @@
     color: var(--blue);
     text-decoration: none;
     transition: var(--transition);
+    width: fit-content;
   }
 
   a:hover,
