@@ -85,20 +85,6 @@
   };
 </script>
 
-<div>
-  <WebGl vs={vShader} fs={fShader} buffer={bFunc} render={rFunc} bind:num={n} />
-  <input type="range" min="0" max="6" bind:value={n} />
-  <h3>Dýpt á endurkvæmni: {n + 1}</h3>
-</div>
-
-<style>
-  div {
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    gap: 1em;
-    align-items: center;
-
-    justify-content: center;
-  }
-</style>
+<WebGl vs={vShader} fs={fShader} buffer={bFunc} render={rFunc} bind:num={n} />
+<input type="range" min="0" max="6" bind:value={n} />
+<h3>Dýpt á endurkvæmni: {n + 1}</h3>

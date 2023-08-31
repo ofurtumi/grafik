@@ -49,7 +49,9 @@
     {/each}
   </nav>
 
-  <slot />
+  <div class="flex-column">
+    <slot />
+  </div>
 </section>
 
 <style>
@@ -92,5 +94,14 @@
   h3 a {
     font-size: 1.3rem;
     color: var(--blue-dim);
+  }
+
+  .flex-column {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
   }
 </style>
