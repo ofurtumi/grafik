@@ -74,23 +74,6 @@
     margin: 2em auto;
   }
 
-  .flex,
-  .flex-column,
-  .flex-evenly {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1em;
-  }
-
-  .flex-column {
-    flex-direction: column;
-  }
-
-  .flex-evenly {
-    justify-content: space-between;
-  }
-
   .matrix_cell {
     display: flex;
     gap: 1rem;
