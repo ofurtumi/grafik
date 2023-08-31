@@ -9,10 +9,12 @@
     prog: WebGLProgram | null | undefined
   ) => void;
   export let render: (gl: WebGLRenderingContext) => void;
+  export let num: number | undefined = undefined;
+  let gl: WebGLRenderingContext | null;
 
   onMount(() => {
     // Initialize the GL context
-    const gl = canvas.getContext("webgl");
+    gl = canvas.getContext("webgl");
 
     // Only continue if WebGL is available and working
     if (!gl) {
@@ -28,8 +30,12 @@
     if (!shaderProgram) return;
     gl.useProgram(shaderProgram);
 
-    render(gl);
+    if (num === undefined) {
+      render(gl);
+    }
   });
+
+  $: num !== undefined && gl !== null && gl !== undefined && render(gl);
 </script>
 
 <canvas bind:this={canvas} id="glcanvas" width="500" height="500" />
@@ -37,7 +43,6 @@
 <style>
   canvas {
     border: var(--border);
-    margin: auto;
     max-width: 500px;
     max-height: 500px;
   }

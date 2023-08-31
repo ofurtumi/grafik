@@ -363,7 +363,22 @@ function flatten(v: vector[] | vector) {
   return floats;
 }
 
-//----------------------------------------------------------------------------
+function mix( u:vector, v:vector, s:number) {
+    if ( typeof s !== "number" ) {
+      throw "mix: the last paramter " + s + " must be a number";
+    }
+
+    if ( u.length != v.length ) {
+      throw "vector dimension mismatch";
+    }
+
+    let result = [];
+    for ( let i = 0; i < u.length; ++i ) {
+      result.push( (1.0 - s) * u[i] + s * v[i] );
+    }
+
+    return result;
+}
 
 const sizeof = {
   vec2: new Float32Array(flatten(vec2())).byteLength,
@@ -374,4 +389,4 @@ const sizeof = {
   mat4: new Float32Array(flatten(mat4())).byteLength,
 };
 
-export { vec2, vec3, vec4, mat2, mat3, mat4, isMatrix, equal, flatten, add, scale, sizeof };
+export { vec2, vec3, vec4, mat2, mat3, mat4, isMatrix, equal, flatten, add, scale, sizeof, mix };
