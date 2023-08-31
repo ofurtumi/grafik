@@ -32,6 +32,7 @@
   --orange-dim: #d65d0e;
 
   --border: 5px solid var(--bg_h);
+  --transition: 0.2s ease-in-out;
 }
 
 * {
@@ -95,4 +96,21 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.flex,
+.flex-column,
+.flex-evenly {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-evenly {
+  justify-content: space-between;
 }

@@ -55,6 +55,9 @@
 </section>
 
 <style>
+  header {
+    text-align: center;
+  }
   section {
     height: 100%;
     display: flex;
@@ -73,6 +76,12 @@
   a {
     color: var(--blue);
     text-decoration: none;
+    transition: var(--transition);
+  }
+
+  a:hover,
+  a:focus {
+    color: var(--orange);
   }
 
   .branch {
@@ -100,8 +109,15 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 2rem;
+    padding: 1rem;
+  }
+
+  @media screen and (min-width: 700px) {
+    .flex-column {
+      justify-content: center;
+    }
   }
 </style>
