@@ -22,6 +22,8 @@
   )
 }
 
+#text(size: 0.8em, align(center, [ _ATH. allar myndir nema síðasta eru teknar á gömlu síðunni, uppfærði vefumhverfið í millitíðinni og gerði meira fancy_ ]))
+
 = Breytingar á gasket
 - Setja fyrsta punkt lengst út fyrir mörk þríhyrningsins
 - Auka stærð á hverjum puntki
@@ -46,9 +48,9 @@ Við ætlum að breyta því hvernig sýnidæmið teiknar þríhyrninga, við er
   Ef ég skil þessa aðferð rétt þá teiknar hún þríhyrninga á milli síðustu þriggja punkta sem hún fékk gefins _( sjá mynd 3 )_. Hérna þarf því að passa röð hnúta nokkuð vel þar sem hún er ekki jafn sjálfgefin og fyrir TRIANGLE_FAN.
   ]) 
 #grid(columns: 3, gutter: 16pt,
-  figure(image("../imgs/tri-fan.png"), caption: [Sjá útkomu þessa fylkis #link("https://grafik.sjomli.is/v2_2")[hér]]),
+  figure(image("../imgs/tri-fan.png"), caption: [Sjá útkomu þessa fylkis #link("https://grafik.sjomli.is/h2/v2")[hér]]),
   figure(box(stroke: 2pt, image("../imgs/rect-v2-2.png") ), caption: [Báðar myndirnar líta alveg eins út og það er svona]),
-  figure(image("../imgs/tri-strip.png"), caption: [Sjá útkomu þessa fylkis #link("https://grafik.sjomli.is/v2_2")[hér]]),
+  figure(image("../imgs/tri-strip.png"), caption: [Sjá útkomu þessa fylkis #link("https://grafik.sjomli.is/h2/v2")[hér]]),
 )
 
 
@@ -101,7 +103,7 @@ Breytingar á kóðanum fyrir ofan voru ekki miklar en þó:
 - Einfaldaði uppsetningarkóðann helling, núna er eru allir hnútar frumstilltir í miðju
 - Bætti við nýrri uniform breytu, `uniform vec2 offset`, inn í punktalitarann sem er notaður til að hliðra hnútunum frá miðjunni
 
-Nú eru það litararnir sem sjá um að hliðra þríhyrningunum frekar en uppsetningarferlið, hægt að sjá lokaútkomuna #link("https://grafik.sjomli.is/v2_4/", [*hér*]).
+Nú eru það litararnir sem sjá um að hliðra þríhyrningunum frekar en uppsetningarferlið, hægt að sjá lokaútkomuna #link("https://grafik.sjomli.is/h2/v4/", [*hér*]).
 
 #grid(columns: (1fr, 1fr), rows: 12em, gutter: 8pt, 
   figure(
@@ -132,4 +134,10 @@ for (let i = 0; i < tri.length; i += 3) {
     caption: [Litun og teikning]
   )
 )
+\
 
+
+= Sierpinski teppi
+Þetta tók sinn tíma, mest af honum fór þó í að útbúa nýtt umhverfi fyrir forritin til að lifa í en slatti líka að smíða sjálft forritið. Ég notaði líka tækni úr `gasket5` til þess að geta séð teppið í mismunandi endurkvæmnis dýpt. Forritið má finna keyrandi #link("https://grafik.sjomli.is/h2/v5/", [*hér*]).
+
+#figure(image("../imgs/sierpenski_teppi.png", width: 50%), caption: [útkoma á endurkvæmnis-dýpt 4])
