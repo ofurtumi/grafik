@@ -88,7 +88,7 @@
 <div>
   <WebGl vs={vShader} fs={fShader} buffer={bFunc} render={rFunc} bind:num={n} />
   <input type="range" min="0" max="6" bind:value={n} />
-  <h3>Dýpt á endurkvæmni: {n}</h3>
+  <h3>Dýpt á endurkvæmni: {n + 1}</h3>
 </div>
 
 <style>
