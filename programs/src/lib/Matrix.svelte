@@ -28,6 +28,6 @@
 
   span {
     color: var(--c4);
-    font-size: calc(200px / (var(--dimension) * 1.2));
+    font-size: calc(200px / (var(--dimension) * 1.4));
   }
 </style>
