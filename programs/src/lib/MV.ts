@@ -13,7 +13,7 @@ export type vector = number[];
  * @returns `number` that is the radians
  *
  */
-const radians = (degs: number) => {
+export const radians = (degs: number) => {
   return (degs * Math.PI) / 180.0;
 };
 
@@ -22,7 +22,7 @@ const radians = (degs: number) => {
  * @param radians number of radians
  * @returns `number` that is the degrees
  */
-const degrees = (rads: number) => {
+export const degrees = (rads: number) => {
   return (rads * 180.0) / Math.PI;
 };
 
@@ -33,7 +33,7 @@ const degrees = (rads: number) => {
  * @param args numbers to be put into the vector, parametrs `n > 2` are ignored
  * @returns `number[]`
  */
-function vec2(...args: number[]): vector {
+export function vec2(...args: number[]): vector {
   const result: number[] = args.map((x) => (x === undefined ? 0.0 : x));
 
   switch (result.length) {
@@ -51,7 +51,7 @@ function vec2(...args: number[]): vector {
  * @param args numbers to be put into the vector, parametrs `n > 3` are ignored
  * @returns `number[]`
  */
-const vec3 = (...args: number[]): vector => {
+export const vec3 = (...args: number[]): vector => {
   const result: number[] = args.map((x) => (x === undefined ? 0.0 : x));
 
   switch (result.length) {
@@ -71,7 +71,7 @@ const vec3 = (...args: number[]): vector => {
  * @param args numbers to be put into the vector, parametrs `n > 4` are ignored
  * @returns `number[]`
  */
-const vec4 = (...args: number[]): vector => {
+export const vec4 = (...args: number[]): vector => {
   const result: number[] = args.map((x) => (x === undefined ? 0.0 : x));
 
   switch (result.length) {
@@ -98,7 +98,7 @@ const vec4 = (...args: number[]): vector => {
  * @param args numbers to be put into the matrix, parametrs `n > 4` are ignored
  * @returns `number[][]`
  */
-const mat2 = (...args: number[]): matrix => {
+export const mat2 = (...args: number[]): matrix => {
   let [a1 = 1, a2, b1, b2] = args;
   if (a2 === undefined) {
     [(a2 = 0), (b1 = a2), (b2 = a1)];
@@ -121,7 +121,7 @@ const mat2 = (...args: number[]): matrix => {
  * @param args numbers to be put into the matrix, parametrs `n > 9` are ignored
  * @returns `number[][]`
  */
-const mat3 = (...args: number[]): matrix => {
+export const mat3 = (...args: number[]): matrix => {
   // prettier-ignore
   let [
     a1 = 1, a2, a3, 
@@ -151,7 +151,7 @@ const mat3 = (...args: number[]): matrix => {
  * @param args numbers to be put into the matrix, parametrs `n > 16` are ignored
  * @returns `number[][]`
  */
-const mat4 = (...args: number[]): matrix => {
+export const mat4 = (...args: number[]): matrix => {
   // prettier-ignore
   let [
     a1 = 1, a2, a3, a4, 
@@ -175,16 +175,11 @@ const mat4 = (...args: number[]): matrix => {
   return data;
 };
 
-const isMatrix = (m: matrix | vector): m is matrix => {
+export const isMatrix = (m: matrix | vector): m is matrix => {
   return (m as matrix)[0].length !== undefined;
 };
 
-//----------------------------------------------------------------------------
-//
-//  Generic Mathematical Operations for Vectors and Matrices
-//
-
-const equal = (u: vector | matrix, v: vector | matrix): boolean => {
+export const equal = (u: vector | matrix, v: vector | matrix): boolean => {
   if (u.length !== v.length) {
     return false;
   }
@@ -211,22 +206,18 @@ const equal = (u: vector | matrix, v: vector | matrix): boolean => {
   return true;
 };
 
-//----------------------------------------------------------------------------
-
 function add(u: vector, v: vector) {
   let result = [];
-    if (u.length != v.length) {
-      throw "add(): vectors are not the same dimension";
-    }
+  if (u.length != v.length) {
+    throw "add(): vectors are not the same dimension";
+  }
 
-    for (let i = 0; i < u.length; ++i) {
-      result.push(u[i] + v[i]);
-    }
+  for (let i = 0; i < u.length; ++i) {
+    result.push(u[i] + v[i]);
+  }
 
-    return result;
+  return result;
 }
-
-//----------------------------------------------------------------------------
 
 function subtract(u, v) {
   var result = [];
@@ -267,8 +258,6 @@ function subtract(u, v) {
     return result;
   }
 }
-
-//----------------------------------------------------------------------------
 
 function mult(u, v) {
   var result = [];
@@ -323,24 +312,18 @@ function mult(u, v) {
   }
 }
 
-function scale( s:number, u:vector )
-{
-    if ( !Array.isArray(u) ) {
-        throw "scale: second parameter " + u + " is not a vector";
-    }
+function scale(s: number, u: vector) {
+  if (!Array.isArray(u)) {
+    throw "scale: second parameter " + u + " is not a vector";
+  }
 
-    var result = [];
-    for ( var i = 0; i < u.length; ++i ) {
-        result.push( s * u[i] );
-    }
+  var result = [];
+  for (var i = 0; i < u.length; ++i) {
+    result.push(s * u[i]);
+  }
 
-    return result;
+  return result;
 }
-
-//----------------------------------------------------------------------------
-//
-//  Basic Transformation Matrix Generators
-//
 
 function translate(x, y, z) {
   if (Array.isArray(x) && x.length == 3) {
@@ -357,36 +340,8 @@ function translate(x, y, z) {
   return result;
 }
 
-function flatten(v: vector[] | vector) {
+export const flatten = (v: vector[] | vector) => {
   // TODO: add matrix support
-  let floats = new Float32Array(v.flat())
+  let floats = new Float32Array(v.flat());
   return floats;
-}
-
-function mix( u:vector, v:vector, s:number) {
-    if ( typeof s !== "number" ) {
-      throw "mix: the last paramter " + s + " must be a number";
-    }
-
-    if ( u.length != v.length ) {
-      throw "vector dimension mismatch";
-    }
-
-    let result = [];
-    for ( let i = 0; i < u.length; ++i ) {
-      result.push( (1.0 - s) * u[i] + s * v[i] );
-    }
-
-    return result;
-}
-
-const sizeof = {
-  vec2: new Float32Array(flatten(vec2())).byteLength,
-  vec3: new Float32Array(flatten(vec3())).byteLength,
-  vec4: new Float32Array(flatten(vec4())).byteLength,
-  mat2: new Float32Array(flatten(mat2())).byteLength,
-  mat3: new Float32Array(flatten(mat3())).byteLength,
-  mat4: new Float32Array(flatten(mat4())).byteLength,
 };
-
-export { vec2, vec3, vec4, mat2, mat3, mat4, isMatrix, equal, flatten, add, scale, sizeof, mix };
