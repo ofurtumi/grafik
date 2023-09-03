@@ -2,25 +2,34 @@
   import { vec2, vec3, vec4, mat2, mat3, mat4 } from "$lib/MV";
   import Matrix from "$lib/Matrix.svelte";
   import Number from "$lib/Number.svelte";
-  let [a, b, c, d]: number[] = new Array(4).fill(undefined);
 
-  let values = new Array(4).fill(undefined);
-  $: v2 = vec2(values[0], values[1], values[2], values[3]);
-  $: v3 = vec3(values[0], values[1], values[2], values[3]);
-  $: v4 = vec4(values[0], values[1], values[2], values[3]);
-  $: m2 = mat2(values[0], values[1], values[2], values[3]);
-  $: m3 = mat3(values[0], values[1], values[2], values[3]);
-  $: m4 = mat4(values[0], values[1], values[2], values[3]);
-
-  const U = (x: number | undefined) => (x === undefined ? "U" : x);
+  //let values = new Array(4).fill(new Array(4).fill(0));
+  let values = [
+    new Array(4).fill(undefined),
+    new Array(4).fill(undefined),
+    new Array(4).fill(undefined),
+    new Array(4).fill(undefined),
+  ];
+  const getValues = () => values.flat();
+  $: values && console.log(...getValues());
+  $: v2 = vec2(...values[0], ...values[1], ...values[2], ...values[3]);
+  $: v3 = vec3(...values[0], ...values[1], ...values[2], ...values[3]);
+  $: v4 = vec4(...values[0], ...values[1], ...values[2], ...values[3]);
+  $: m2 = mat2(...values[0], ...values[1], ...values[2], ...values[3]);
+  $: m3 = mat3(...values[0], ...values[1], ...values[2], ...values[3]);
+  $: m4 = mat4(...values[0], ...values[1], ...values[2], ...values[3]);
 </script>
 
 <div class="main-container">
   <div class="flex-column">
     <h1>Values</h1>
-    <div class="flex">
-      {#each values as val}
-        <Number bind:n={val} />
+    <div class="flex-column">
+      {#each values as row}
+        <div class="flex row">
+          {#each row as val}
+            <Number bind:n={val} />
+          {/each}
+        </div>
       {/each}
     </div>
   </div>
@@ -46,17 +55,14 @@
     <div class="flex">
       <div class="matrix_cell">
         <Matrix matrix={m2} dimension={2} />
-        <p>mat2({U(a)}, {U(b)}, {U(c)}, {U(d)})</p>
       </div>
 
       <div class="matrix_cell">
         <Matrix matrix={m3} dimension={3} />
-        <p>mat3({U(a)}, {U(b)}, {U(c)}, {U(d)})</p>
       </div>
 
       <div class="matrix_cell">
         <Matrix matrix={m4} dimension={4} />
-        <p>mat4({U(a)}, {U(b)}, {U(c)}, {U(d)})</p>
       </div>
     </div>
   </div>
