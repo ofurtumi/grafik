@@ -45,6 +45,9 @@ body {
   font-family: monospace;
   background: var(--bg_s);
   color: var(--fg);
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  grid-template-rows: 100px 1fr;
   height: 100vh;
   overflow: hidden;
 }
@@ -98,19 +101,31 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-.flex,
-.flex-column,
-.flex-evenly {
+.flex {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1em;
 }
 
-.flex-column {
+.column {
   flex-direction: column;
 }
 
-.flex-evenly {
+.flex .evenly {
   justify-content: space-between;
+}
+
+.flex .around {
+  justify-content: space-around;
+  align-items: start;
+}
+
+.flex .start {
+  justify-content: flex-start;
+}
+
+.grid-center {
+  grid-column: 3 / span 4;
+  justify-self: center;
 }

@@ -206,7 +206,7 @@ export const equal = (u: vector | matrix, v: vector | matrix): boolean => {
   return true;
 };
 
-function add(u: vector, v: vector) {
+export const add = (u: vector, v: vector) => {
   let result = [];
   if (u.length != v.length) {
     throw "add(): vectors are not the same dimension";
@@ -217,7 +217,7 @@ function add(u: vector, v: vector) {
   }
 
   return result;
-}
+};
 
 function subtract(u, v) {
   var result = [];
@@ -312,7 +312,7 @@ function mult(u, v) {
   }
 }
 
-function scale(s: number, u: vector) {
+export const scale = (s: number, u: vector) => {
   if (!Array.isArray(u)) {
     throw "scale: second parameter " + u + " is not a vector";
   }
@@ -323,7 +323,7 @@ function scale(s: number, u: vector) {
   }
 
   return result;
-}
+};
 
 function translate(x, y, z) {
   if (Array.isArray(x) && x.length == 3) {

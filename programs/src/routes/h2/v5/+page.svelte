@@ -1,6 +1,6 @@
 <script lang="ts">
   import WebGl from "$lib/WebGL.svelte";
-  import { vec2, flatten, mix, type vector } from "$lib/MV";
+  import { vec2, flatten, type vector } from "$lib/MV";
 
   let points: vector[] = [];
   let n = 3;
@@ -86,5 +86,5 @@
 </script>
 
 <WebGl vs={vShader} fs={fShader} buffer={bFunc} render={rFunc} bind:num={n} />
-<input type="range" min="0" max="6" bind:value={n} />
-<h3>Dýpt á endurkvæmni: {n + 1}</h3>
+<input type="range" min="0" max="6" bind:value={n} class="grid-center" />
+<h3 class="grid-center">Dýpt á endurkvæmni: {n + 1}</h3>

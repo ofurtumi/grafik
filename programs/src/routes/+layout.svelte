@@ -18,8 +18,6 @@
       tree[link[0]].push(link[1]);
     }
   });
-
-  console.log(tree);
 </script>
 
 <header>
@@ -27,50 +25,50 @@
   <h2>Þorvaldur Tumi Baldursson</h2>
 </header>
 
-<section>
-  <nav>
-    {#each Object.entries(tree) as branch}
-      <div>
-        {#if branch[1][0] === undefined}
-          <h3>
-            <a href={"/" + branch[0]}>
-              {branch[0]}
-            </a>
-          </h3>
-        {:else}
-          <h3>{branch[0]}</h3>
-          <div class="branch">
-            {#each branch[1] as link}
-              <a href={`/${branch[0]}/${link}`}>{link}</a>
-            {/each}
-          </div>
-        {/if}
-      </div>
-    {/each}
-  </nav>
+<nav>
+  {#each Object.entries(tree) as branch}
+    <div>
+      {#if branch[1][0] === undefined}
+        <h3>
+          <a href={"/" + branch[0]}>
+            {branch[0]}
+          </a>
+        </h3>
+      {:else}
+        <h3>{branch[0]}</h3>
+        <div class="branch">
+          {#each branch[1] as link}
+            <a href={`/${branch[0]}/${link}`}>{link}</a>
+          {/each}
+        </div>
+      {/if}
+    </div>
+  {/each}
+</nav>
 
-  <div class="flex-column">
-    <slot />
-  </div>
-</section>
+<main class="flex column">
+  <slot />
+</main>
 
 <style>
   header {
     text-align: center;
-  }
-  section {
-    height: 100%;
-    display: flex;
+    grid-column: span 2;
+    grid-row: 1;
   }
 
   nav {
     display: flex;
     flex-direction: column;
     height: 100%;
-    width: 10rem;
     border-right: var(--border);
     padding: 1rem;
+    padding-left: 2rem;
     gap: 2rem;
+  }
+
+  main {
+    overflow-y: scroll;
   }
 
   a {
