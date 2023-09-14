@@ -34,14 +34,13 @@
 
   const vShader = `
     attribute vec4 vPosition;
-    uniform vec2 offset;
+    uniform vec4 offset;
     uniform float rotation;
-
 
     void
     main() {
       gl_PointSize = 20.0;
-      gl_Position = vec4(vPosition.xy + offset, 0.0, 1.0);
+      gl_Position = vPosition + offset;
     }`;
 
   const fShader = `
@@ -155,19 +154,20 @@
 
   const rFunc = (gl: WebGLRenderingContext) => {
     gl.clear(gl.COLOR_BUFFER_BIT);
+
     // blood 🩸
     gl.bindBuffer(gl.ARRAY_BUFFER, bloodBuffer);
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
     gl.uniform4f(colorLoc, 0.8, 0.0, 0.0, 1.0);
     blood_pos.forEach((pos) => {
-      gl.uniform2f(offsetLoc, pos[0], pos[1]);
+      gl.uniform4f(offsetLoc, pos[0], pos[1], 0, 0);
       gl.drawArrays(gl.TRIANGLE_FAN, 0, 5);
     });
 
     // background
     gl.bindBuffer(gl.ARRAY_BUFFER, mapBuffer);
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2f(offsetLoc, 0.0, 0.0);
+    gl.uniform4f(offsetLoc, 0, 0, 0, 0);
     gl.uniform4f(colorLoc, 0.4, 0.5, 0.2, 0.2);
     for (let i = 0; i < num_map; ++i) {
       gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
@@ -183,7 +183,7 @@
     );
 
     gl.uniform4f(colorLoc, 0.1, 0.6, 0.0, 1.0);
-    gl.uniform2f(offsetLoc, 0.0, 0.0);
+    gl.uniform4f(offsetLoc, 0, 0, 0, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // cars
@@ -196,7 +196,7 @@
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
     gl.uniform4f(colorLoc, 0.0, 0.0, 0.0, 1.0);
     for (let i = 0; i < counter; ++i) {
-      gl.uniform2f(offsetLoc, i * 0.03, 0);
+      gl.uniform4f(offsetLoc, i * 0.03, 0, 0, 0);
       gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
     }
 
@@ -209,7 +209,7 @@
         gl.uniform4f(colorLoc, 0.6, 0.2 * road, 0.0 + 0.5 * section, 0.8);
         for (let car = 0; car < num_car; ++car) {
           const [x_off, y_off] = offsets(section, road, car, time);
-          gl.uniform2f(offsetLoc, x_off, y_off);
+          gl.uniform4f(offsetLoc, x_off, y_off, 0, 0);
           gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 
           if (offset[1] < 0.05 + y_off && offset[1] > -0.05 + y_off) {
