@@ -13,7 +13,7 @@
   // Game variables
   const num_map = 3;
   const num_roads = 8;
-  const num_car = 5;
+  const num_cars = 5;
   const cars: vector[] = [];
   let blood_pos: vector[] = [];
   $: death_count = 0;
@@ -207,7 +207,8 @@
     for (let section = 0; section < 2; ++section) {
       for (let road = 0; road < num_roads / 2; ++road) {
         gl.uniform4f(colorLoc, 0.6, 0.2 * road, 0.0 + 0.5 * section, 0.8);
-        for (let car = 0; car < num_car; ++car) {
+        for (let car = 0; car < num_cars; ++car) {
+          // sækja upplýsingar um offset í sér fall
           const [x_off, y_off] = offsets(section, road, car, time);
           gl.uniform4f(offsetLoc, x_off, y_off, 0, 0);
           gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
