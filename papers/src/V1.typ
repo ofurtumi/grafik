@@ -1,4 +1,5 @@
-#import "../lib/info.typ": template, header
+#import "@templates/ass:0.0.1": *
+
 #import emoji
 #show: doc => template(
   project: "Verkefni 1",
