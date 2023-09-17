@@ -18,6 +18,10 @@
   $: m4 = mat4(...values[0], ...values[1], ...values[2], ...values[3]);
 </script>
 
+<p>
+  Tól til að prófa aðferðir úr gefna forritunarsafninu <code>MV.js</code> eftir að
+  þær hafa verið færðar yfir í typscript
+</p>
 <div class="values flex column start">
   <h1>Values</h1>
   <div class="flex-column">
