@@ -10,6 +10,9 @@ const rand_between = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
 };
 
+// einfalt sleep fall, notar promises, fengið héðan: https://stackoverflow.com/a/39914235
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 // Skilar hnitum fyrir þríhyrning með miðju í (x, y) og stærð size
 const tri_from_coords = (x: number, y: number, size = 0.5, dir = 1) => {
   let points: vector[] = [];
@@ -64,4 +67,11 @@ const random_rgba = () => {
   return vec4(Math.random(), Math.random(), Math.random(), 1.0);
 };
 
-export { random_rgba, rand_between, tri_from_coords, rect_from_coords, rect };
+export {
+  random_rgba,
+  rand_between,
+  tri_from_coords,
+  rect_from_coords,
+  rect,
+  sleep,
+};
