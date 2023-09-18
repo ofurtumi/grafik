@@ -106,6 +106,8 @@
 
   main {
     overflow-y: scroll;
+    justify-content: start;
+    padding: 1rem 0;
   }
 
   a {

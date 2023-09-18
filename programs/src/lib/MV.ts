@@ -4,7 +4,14 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+ * simple 2d array type
+ */
 export type matrix = number[][];
+
+/**
+ * simple 1d array type
+ */
 export type vector = number[];
 
 /**
@@ -175,10 +182,21 @@ export const mat4 = (...args: number[]): matrix => {
   return data;
 };
 
+/**
+ * # Typechekcing for matrix
+ * @param `m` a matrix or vector
+ * @returns `boolean` true if `m` is a matrix
+ */
 export const isMatrix = (m: matrix | vector): m is matrix => {
   return (m as matrix)[0].length !== undefined;
 };
 
+/**
+ * # Equality check for matrix and vectors
+ * @param `u` a matrix or vector
+ * @param `v` a matrix or vector
+ * @returns `boolean` true if `u` and `v` are equal
+ */
 export const equal = (u: vector | matrix, v: vector | matrix): boolean => {
   if (u.length !== v.length) {
     return false;
@@ -206,57 +224,92 @@ export const equal = (u: vector | matrix, v: vector | matrix): boolean => {
   return true;
 };
 
-export const add = (u: vector, v: vector) => {
-  let result = [];
+/**
+ * # Vector and matrix addition
+ * Adds two vectors or matrices together
+ * Vector example: [1,2] + [3,4] = [4,6]
+ * Matrix example: [[1,2],[3,4]] + [[5,6],[7,8]] = [[6,8],[10,12]]
+ * should work for any length of vector
+ * @param `u` a vector or matrix
+ * @param `v` a vector or matrix
+ * @returns `vector` or `matrix` that is the sum of `u` and `v`
+ */
+export const add = (u: vector | matrix, v: vector | matrix) => {
   if (u.length != v.length) {
-    throw "add(): vectors are not the same dimension";
+    throw "add(): objects are not the same dimension";
   }
 
+  if (isMatrix(u) && isMatrix(v)) {
+    if (u.length !== v.length) {
+      throw "add(): trying to add matrices of different dimensions";
+    }
+
+    let result: number[][] = [];
+
+    for (let i = 0; i < u.length; ++i) {
+      if (u[i].length !== v[i].length) {
+        throw "add(): trying to add matrices of different dimensions";
+      }
+
+      result.push([]);
+      for (let j = 0; j < u[i].length; ++j) {
+        result[i].push(Number(u[i][j]) + Number( v[i][j] ));
+      }
+    }
+    return result
+  } 
+
+  let result: vector = [];
   for (let i = 0; i < u.length; ++i) {
-    result.push(u[i] + v[i]);
+    result.push(( u[i] as number ) + ( v[i] as number ));
   }
 
   return result;
 };
 
-function subtract(u, v) {
-  var result = [];
-
-  if (u.matrix && v.matrix) {
-    if (u.length != v.length) {
-      throw (
-        "subtract(): trying to subtract matrices" + " of different dimensions"
-      );
-    }
-
-    for (var i = 0; i < u.length; ++i) {
-      if (u[i].length != v[i].length) {
-        throw (
-          "subtract(): trying to subtact matrices" + " of different dimensions"
-        );
-      }
-      result.push([]);
-      for (var j = 0; j < u[i].length; ++j) {
-        result[i].push(u[i][j] - v[i][j]);
-      }
-    }
-
-    result.matrix = true;
-
-    return result;
-  } else if ((u.matrix && !v.matrix) || (!u.matrix && v.matrix)) {
-    throw "subtact(): trying to subtact  matrix and non-matrix variables";
-  } else {
-    if (u.length != v.length) {
-      throw "subtract(): vectors are not the same length";
-    }
-
-    for (var i = 0; i < u.length; ++i) {
-      result.push(u[i] - v[i]);
-    }
-
-    return result;
+/**
+  * # Vector and matrix subtraction
+  * Subtracts two vectors or matrices
+  * Vecotr example: [1,2] - [3,4] = [-2,-2]
+    * Matrix example: [[1,2],[3,4]] - [[5,6],[7,8]] = [[-4,-4],[-4,-4]]
+    * should work for any length of vector
+  * @param `u` a vector or matrix
+  * @param `v` a vector or matrix
+  * @returns `vector` or `matrix` that is the difference of `u` and `v`
+  * @throws `string` if `u` and `v` are not the same dimension
+  * @throws `string` if `u` and `v` are matrices and not the same dimension
+  */
+export const subtract = (u: vector | matrix, v: vector | matrix) => {
+  if (u.length != v.length) {
+    throw "add(): objects are not the same dimension";
   }
+
+  if (isMatrix(u) && isMatrix(v)) {
+    if (u.length !== v.length) {
+      throw "add(): trying to add matrices of different dimensions";
+    }
+
+    let result: number[][] = [];
+
+    for (let i = 0; i < u.length; ++i) {
+      if (u[i].length !== v[i].length) {
+        throw "add(): trying to add matrices of different dimensions";
+      }
+
+      result.push([]);
+      for (let j = 0; j < u[i].length; ++j) {
+        result[i].push(Number(u[i][j]) - Number( v[i][j] ));
+      }
+    }
+    return result
+  } 
+
+  let result: vector = [];
+  for (let i = 0; i < u.length; ++i) {
+    result.push(( u[i] as number ) - ( v[i] as number ));
+  }
+
+  return result;
 }
 
 function mult(u, v) {
@@ -339,7 +392,6 @@ function translate(x, y, z) {
 
   return result;
 }
-
 export const flatten = (v: vector[] | vector) => {
   // TODO: add matrix support
   let floats = new Float32Array(v.flat());
