@@ -188,7 +188,7 @@ export const mat4 = (...args: number[]): matrix => {
  * @returns `boolean` true if `m` is a matrix
  */
 export const isMatrix = (m: matrix | vector): m is matrix => {
-  return (m as matrix)[0].length !== undefined;
+  return Array.isArray((m as matrix)[0]);
 };
 
 /**
@@ -234,7 +234,7 @@ export const equal = (u: vector | matrix, v: vector | matrix): boolean => {
  * @param `v` a vector or matrix
  * @returns `vector` or `matrix` that is the sum of `u` and `v`
  */
-export const add = (u: vector | matrix, v: vector | matrix) => {
+export const add = (u: vector | matrix, v: vector | matrix) => {
   if (u.length != v.length) {
     throw "add(): objects are not the same dimension";
   }
@@ -253,33 +253,33 @@ export const add = (u: vector | matrix, v: vector | matrix) => {
 
       result.push([]);
       for (let j = 0; j < u[i].length; ++j) {
-        result[i].push(Number(u[i][j]) + Number( v[i][j] ));
+        result[i].push(Number(u[i][j]) + Number(v[i][j]));
       }
     }
-    return result
-  } 
+    return result as matrix;
+  }
 
   let result: vector = [];
   for (let i = 0; i < u.length; ++i) {
-    result.push(( u[i] as number ) + ( v[i] as number ));
+    result.push((u[i] as number) + (v[i] as number));
   }
 
-  return result;
+  return result as vector;
 };
 
 /**
-  * # Vector and matrix subtraction
-  * Subtracts two vectors or matrices
-  * Vecotr example: [1,2] - [3,4] = [-2,-2]
-    * Matrix example: [[1,2],[3,4]] - [[5,6],[7,8]] = [[-4,-4],[-4,-4]]
-    * should work for any length of vector
-  * @param `u` a vector or matrix
-  * @param `v` a vector or matrix
-  * @returns `vector` or `matrix` that is the difference of `u` and `v`
-  * @throws `string` if `u` and `v` are not the same dimension
-  * @throws `string` if `u` and `v` are matrices and not the same dimension
-  */
-export const subtract = (u: vector | matrix, v: vector | matrix) => {
+ * # Vector and matrix subtraction
+ * Subtracts two vectors or matrices
+ * Vecotr example: [1,2] - [3,4] = [-2,-2]
+ * Matrix example: [[1,2],[3,4]] - [[5,6],[7,8]] = [[-4,-4],[-4,-4]]
+ * should work for any length of vector
+ * @param `u` a vector or matrix
+ * @param `v` a vector or matrix
+ * @returns `vector` or `matrix` that is the difference of `u` and `v`
+ * @throws `string` if `u` and `v` are not the same dimension
+ * @throws `string` if `u` and `v` are matrices and not the same dimension
+ */
+export const subtract = (u: vector | matrix, v: vector | matrix) => {
   if (u.length != v.length) {
     throw "add(): objects are not the same dimension";
   }
@@ -298,39 +298,49 @@ export const subtract = (u: vector | matrix, v: vector | matrix) => {
 
       result.push([]);
       for (let j = 0; j < u[i].length; ++j) {
-        result[i].push(Number(u[i][j]) - Number( v[i][j] ));
+        result[i].push(Number(u[i][j]) - Number(v[i][j]));
       }
     }
-    return result
-  } 
+    return result as matrix;
+  }
 
   let result: vector = [];
   for (let i = 0; i < u.length; ++i) {
-    result.push(( u[i] as number ) - ( v[i] as number ));
+    result.push((u[i] as number) - (v[i] as number));
   }
 
-  return result;
-}
+  return result as vector;
+};
 
-function mult(u, v) {
-  var result = [];
-
-  if (u.matrix && v.matrix) {
+/**
+ * # Vector and matrix multiplication
+ * Multiplies two vectors, two matrices or a vector and a matrix
+ * Vector example: [1,2] * [3,4] = [3, 8]
+ * Matrix example: [[1,2],[3,4]] * [[5,4],[3,2]] = [[5,8],[9,8]]
+ * If M*V, matrix needs to be first parameter
+ * @param `u` a vector or matrix
+ * @param `v` a vector or matrix
+ * @returns `vector` or `matrix` that is the multiplication of `u` and `v`
+ * @throws `string` if `u` and `v` are not the same dimension
+ * @throws `string` if `u` and `v` are matrices and not the same dimension
+ */
+export const mult = (u: vector | matrix, v: vector | matrix) => {
+  // matrix * matrix
+  if (isMatrix(u) && isMatrix(v)) {
     if (u.length != v.length) {
       throw "mult(): trying to add matrices of different dimensions";
     }
 
-    for (var i = 0; i < u.length; ++i) {
+    let result: matrix = [];
+
+    for (let i = 0; i < u.length; ++i) {
       if (u[i].length != v[i].length) {
         throw "mult(): trying to add matrices of different dimensions";
       }
-    }
 
-    for (var i = 0; i < u.length; ++i) {
       result.push([]);
-
-      for (var j = 0; j < v.length; ++j) {
-        var sum = 0.0;
+      for (let j = 0; j < v.length; ++j) {
+        let sum = 0.0;
         for (var k = 0; k < u.length; ++k) {
           sum += u[i][k] * v[k][j];
         }
@@ -338,39 +348,42 @@ function mult(u, v) {
       }
     }
 
-    result.matrix = true;
-
     return result;
   }
 
-  if (u.matrix && u.length == v.length) {
-    for (var i = 0; i < v.length; i++) {
-      var sum = 0.0;
-      for (var j = 0; j < v.length; j++) {
-        sum += u[i][j] * v[j];
+  // matrix * vector
+  if (isMatrix(u) && u.length == v.length) {
+    let result: vector = [];
+
+    for (let i = 0; i < v.length; i++) {
+      let sum = 0.0;
+      for (let j = 0; j < v.length; j++) {
+        sum += u[i][j] * (v as vector)[j];
       }
       result.push(sum);
     }
     return result;
   } else {
-    if (u.length != v.length) {
+    if (u.length != v.length && !isMatrix(u) && !isMatrix(v)) {
       throw "mult(): vectors are not the same dimension";
     }
 
+    let result: vector = [];
+
     for (var i = 0; i < u.length; ++i) {
-      result.push(u[i] * v[i]);
-    }
+      result.push((u as vector)[i] * (v as vector)[i]);
+    } 
 
     return result;
   }
-}
+};
 
 export const scale = (s: number, u: vector) => {
   if (!Array.isArray(u)) {
     throw "scale: second parameter " + u + " is not a vector";
   }
 
-  var result = [];
+  let result: vector = [];
   for (var i = 0; i < u.length; ++i) {
     result.push(s * u[i]);
   }
@@ -378,22 +391,39 @@ export const scale = (s: number, u: vector) => {
   return result;
 };
 
-function translate(x, y, z) {
-  if (Array.isArray(x) && x.length == 3) {
-    z = x[2];
-    y = x[1];
-    x = x[0];
-  }
+// export const scalem = (x, y, z) => {
+//   if (!isMatrix(u)) {
+//     throw "scalem(): second parameter " + u + " is not a matrix";
+//   }
+//
+// if ( Array.isArray(x) && x.length == 3 ) {
+//         z = x[2];
+//         y = x[1];
+//         x = x[0];
+//     }
+//
+//   let result: matrix = [];
+//   for (let i = 0; i < u.length; ++i) {
+//    } 
+// }
 
-  var result = mat4();
-  result[0][3] = x;
-  result[1][3] = y;
-  result[2][3] = z;
 
-  return result;
-}
-export const flatten = (v: vector[] | vector) => {
-  // TODO: add matrix support
+// function translate(x, y, z) {
+//   if (Array.isArray(x) && x.length == 3) {
+//     z = x[2];
+//     y = x[1];
+//     x = x[0];
+//   }
+//
+//   var result = mat4();
+//   result[0][3] = x;
+//   result[1][3] = y;
+//   result[2][3] = z;
+//
+//   return result;
+// }
+
+export const flatten = (v: matrix | vector) => {
   let floats = new Float32Array(v.flat());
   return floats;
 };

@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    type matrix,
     vec2,
     vec3,
     vec4,
@@ -9,6 +8,7 @@
     mat4,
     add,
     subtract,
+    mult,
   } from "$lib/MV";
   import Matrix from "$lib/Matrix.svelte";
   import Number from "$lib/Number.svelte";
@@ -27,15 +27,10 @@
   $: m3 = mat3(...values[0], ...values[1], ...values[2], ...values[3]);
   $: m4 = mat4(...values[0], ...values[1], ...values[2], ...values[3]);
 
-  // matrix addition
-  let m_add_1 = mat2(1, 2, 3, 4);
-  let m_add_2 = mat2(2, 3, 4, 5);
-  const m_add_out: matrix = add(m_add_1, m_add_2) as matrix;
-
-  // matrix subtraction
-  let m_sub_1 = mat3(1, 2, 3, 4, 5, 6, 7, 8, 9);
-  let m_sub_2 = mat3(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  const m_sub_out: matrix = subtract(m_sub_1, m_sub_2) as matrix;
+  // matrix addition and subtraction
+  let m_op_vals = new Array(4).fill(0);
+  $: m_op_val = mat2(...m_op_vals);
+  const m_op_const = mat2(1, 2, 3, 4);
 </script>
 
 <p>
@@ -63,15 +58,18 @@
 <div class="flex column evenly divider">
   <h1>Útkoma vecN() aðferða</h1>
   <div class="flex">
-    <p class="focus">
-      vec2(...) = {v2}
-    </p>
-    <p class="focus">
-      vec3(...) = {v3}
-    </p>
-    <p class="focus">
-      vec4(...) = {v4}
-    </p>
+    <div class="flex column">
+      <p class="focus">vec2(...)</p>
+      <Matrix matrix={v2} dimension={2} />
+    </div>
+    <div class="flex column">
+      <p class="focus">vec3(...)</p>
+      <Matrix matrix={v3} dimension={3} />
+    </div>
+    <div class="flex column">
+      <p class="focus">vec4(...)</p>
+      <Matrix matrix={v4} dimension={4} />
+    </div>
   </div>
 </div>
 
@@ -96,22 +94,80 @@
 <div class="flex column divider">
   <h1>add(mv1, mv2)</h1>
   <div class="flex">
-    <Matrix matrix={m_add_1} dimension={2} />
+    {#each m_op_vals as _, i}
+      <Number bind:n={m_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix matrix={m_op_val} dimension={2} />
     <p>+</p>
-    <Matrix matrix={m_add_2} dimension={2} />
+    <Matrix matrix={m_op_const} dimension={2} />
     <p>=</p>
-    <Matrix matrix={m_add_out} dimension={2} />
+    <Matrix matrix={add(m_op_val, m_op_const)} dimension={2} />
   </div>
 </div>
 
 <div class="flex column divider">
   <h1>subtract(mv1, mv2)</h1>
   <div class="flex">
-    <Matrix matrix={m_sub_1} dimension={3} />
+    {#each m_op_vals as _, i}
+      <Number bind:n={m_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix matrix={m_op_val} dimension={2} />
     <p>-</p>
-    <Matrix matrix={m_sub_2} dimension={3} />
+    <Matrix matrix={m_op_const} dimension={2} />
     <p>=</p>
-    <Matrix matrix={m_sub_out} dimension={3} />
+    <Matrix matrix={subtract(m_op_val, m_op_const)} dimension={2} />
+  </div>
+</div>
+
+<div class="flex column divider">
+  <h1>mult(m1, m2)</h1>
+  <div class="flex">
+    {#each m_op_vals as _, i}
+      <Number bind:n={m_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix matrix={m_op_val} dimension={2} />
+    <p>*</p>
+    <Matrix matrix={m_op_const} dimension={2} />
+    <p>=</p>
+    <Matrix matrix={mult(m_op_val, m_op_const)} dimension={2} />
+  </div>
+</div>
+
+<div class="flex column divider">
+  <h1>mult(m1, v1)</h1>
+  <div class="flex">
+    {#each m_op_vals as _, i}
+      <Number bind:n={m_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix matrix={m_op_val} dimension={2} />
+    <p>*</p>
+    <Matrix matrix={vec2(1, 2)} dimension={2} />
+    <p>=</p>
+    <Matrix matrix={mult(m_op_val, vec2(1, 2))} dimension={2} />
+  </div>
+</div>
+
+<div class="flex column divider">
+  <h1>mult(v1, v2)</h1>
+  <div class="flex">
+    {#each m_op_vals.slice(0, -1) as _, i}
+      <Number bind:n={m_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix matrix={vec3(...m_op_vals)} dimension={3} />
+    <p>*</p>
+    <Matrix matrix={vec3(1, 2, 3)} dimension={3} />
+    <p>=</p>
+    <Matrix matrix={mult(vec3(...m_op_vals), vec3(1, 2, 3))} dimension={2} />
   </div>
 </div>
 
