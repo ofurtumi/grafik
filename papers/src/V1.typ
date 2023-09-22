@@ -1,12 +1,12 @@
 #import "@templates/ass:0.0.1": *
 
-#import emoji
 #show: doc => template(
   project: "Verkefni 1",
   class: "TÖL105M - Tölvugrafík",
   doc
 )
 
+#import emoji
 #align(
   center, 
   link(
