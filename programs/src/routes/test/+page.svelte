@@ -9,6 +9,8 @@
     add,
     subtract,
     mult,
+    translate,
+    type matrix,
   } from "$lib/MV";
   import Matrix from "$lib/Matrix.svelte";
   import Number from "$lib/Number.svelte";
@@ -29,8 +31,13 @@
 
   // matrix addition and subtraction
   let m_op_vals = new Array(4).fill(0);
+  let v_op_vals = new Array(3).fill(0);
+
   $: m_op_val = mat2(...m_op_vals);
+  $: v_op_val = vec3(...v_op_vals);
   const m_op_const = mat2(1, 2, 3, 4);
+
+  $: t1 = translate(v3) as matrix;
 </script>
 
 <p>
@@ -168,6 +175,20 @@
     <Matrix matrix={vec3(1, 2, 3)} dimension={3} />
     <p>=</p>
     <Matrix matrix={mult(vec3(...m_op_vals), vec3(1, 2, 3))} dimension={2} />
+  </div>
+</div>
+
+<div class="flex column divider">
+  <h1>translate(v3)</h1>
+  <div class="flex">
+    {#each v_op_vals as _, i}
+      <Number bind:n={v_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix matrix={v_op_val} dimension={3} />
+    <p>=</p>
+    <Matrix matrix={translate(v_op_vals)} dimension={4} />
   </div>
 </div>
 
