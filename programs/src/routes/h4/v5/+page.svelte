@@ -151,13 +151,13 @@
   const offset_change = (e: KeyboardEvent) => {
     if (keydown) return;
     if (e.key === "ArrowUp") {
-      distance_offset += 0.1;
-    } else if (e.key === "ArrowDown") {
-      distance_offset -= 0.1;
-    } else if (e.key === "ArrowLeft") {
-      rotation_offset -= 0.5;
-    } else if (e.key === "ArrowRight") {
       rotation_offset += 0.5;
+    } else if (e.key === "ArrowDown") {
+      rotation_offset -= 0.5;
+    } else if (e.key === "ArrowLeft") {
+      distance_offset -= 0.1;
+    } else if (e.key === "ArrowRight") {
+      distance_offset += 0.1;
     }
 
     keydown = true;
