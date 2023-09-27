@@ -188,7 +188,10 @@ export const mat4 = (...args: number[]): matrix => {
  * @returns `boolean` true if `m` is a matrix
  */
 export const isMatrix = (m: matrix | vector): m is matrix => {
-  return Array.isArray((m as matrix)[0]);
+  if (Array.isArray((m as matrix)[0])) {
+    return m.length === ( m[0] as vector).length;
+  }
+  return false;
 };
 
 /**
@@ -378,6 +381,13 @@ export const mult = (u: vector | matrix, v: vector | matrix) => {
   }
 };
 
+/**
+ * # Vector scaling
+ * @param s number to scale by
+ * @param u vector
+ * @returns `vector` that is the scaled vector
+ * @throws `string` if `u` is not a vector
+ */
 export const scale = (s: number, u: vector) => {
   if (!Array.isArray(u)) {
     throw "scale: second parameter " + u + " is not a vector";
@@ -391,39 +401,110 @@ export const scale = (s: number, u: vector) => {
   return result;
 };
 
-// export const scalem = (x, y, z) => {
-//   if (!isMatrix(u)) {
-//     throw "scalem(): second parameter " + u + " is not a matrix";
-//   }
-//
-// if ( Array.isArray(x) && x.length == 3 ) {
-//         z = x[2];
-//         y = x[1];
-//         x = x[0];
-//     }
-//
-//   let result: matrix = [];
-//   for (let i = 0; i < u.length; ++i) {
-//    } 
-// }
+
+/**
+* # Matrix scaling
+* @param v vector of length 3
+* @returns `matrix` that is the scaling matrix
+* @throws `string` if `v` is not a vector of length 3
+*/
+export const scalem = (v:vector) => {
+  const [x, y, z] = v;
+
+  let result: matrix = mat4();
+  result[0][0] = x;
+  result[1][1] = y;
+  result[2][2] = z;
+
+  return result;
+}
 
 
-// function translate(x, y, z) {
-//   if (Array.isArray(x) && x.length == 3) {
-//     z = x[2];
-//     y = x[1];
-//     x = x[0];
-//   }
-//
-//   var result = mat4();
-//   result[0][3] = x;
-//   result[1][3] = y;
-//   result[2][3] = z;
-//
-//   return result;
-// }
+export const translate = (v: vector) => {
+  const [x, y, z] = v;
+
+  let result = mat4();
+  result[0][3] = x;
+  result[1][3] = y;
+  result[2][3] = z;
+
+  return result;
+}
+
+const transpose = ( m:matrix ) => {
+    if ( !isMatrix(m) ){
+      throw "transpose(): trying to transpose a non-matrix";
+    }
+
+    let result:matrix = [];
+    for ( let i = 0; i < m.length; ++i ) {
+      result.push([]);
+      for ( let j = 0; j < m[0].length; ++j ) {
+          result[i].push( m[j][i] );
+      }
+    }
+
+    return result;
+}
 
 export const flatten = (v: matrix | vector) => {
-  let floats = new Float32Array(v.flat());
+  if (isMatrix(v)) {
+    v = transpose(v);
+  }
+
+  let n = v.length;
+  let EAA = false;
+
+  if (Array.isArray(v[0])) {
+    EAA = true;
+    n *= v[0].length;
+  }
+
+  let floats = new Float32Array(n);
+  if (EAA) {
+    let idx = 0;
+    for (let i = 0; i < v.length; ++i) {
+      for (let j = 0; j < ( v[i] as number[] ).length; ++j) {
+        floats[idx++] = ( v[i] as number[] )[j]
+      }
+    }
+  } else {
+    for (let i = 0; i < v.length; ++i) {
+      floats[i] = Number(v[i]);
+    }
+  }
+
   return floats;
 };
+
+export const rotateX = (theta: number) => {
+  const c = Math.cos( radians(theta) );
+  const s = Math.sin( radians(theta) );
+  const rx = mat4(
+    1.0,  0.0,  0.0,  0.0,
+    0.0,  c,    -s,   0.0,
+    0.0,  s,    c,    0.0,
+    0.0,  0.0,  0.0,  1.0 
+  );
+  return rx;
+}
+
+export const rotateY = (theta: number) => {
+  const c = Math.cos( radians(theta) );
+  const s = Math.sin( radians(theta) );
+  const ry = mat4( c, 0.0, s, 0.0,
+      0.0, 1.0,  0.0, 0.0,
+      -s, 0.0,  c, 0.0,
+      0.0, 0.0,  0.0, 1.0 );
+  return ry;
+}
+
+export const rotateZ = (theta: number) => {
+  const c = Math.cos( radians(theta) );
+  const s = Math.sin( radians(theta) );
+  const rz = mat4( c, -s, 0.0, 0.0,
+      s,  c, 0.0, 0.0,
+      0.0,  0.0, 1.0, 0.0,
+      0.0,  0.0, 0.0, 1.0 );
+  return rz;
+}

@@ -4,7 +4,7 @@
 // ath. passa þegar þú breytir framtíðar Tumi, gæti brotið núverandi forrit
 
 // Skilar tölu á bilinu [min, max)
-import { vec2, vec4, type vector } from "./MV";
+import { vec2, vec3, vec4, type matrix, type vector } from "./MV";
 
 const rand_between = (min: number, max: number) => {
   return Math.random() * (max - min) + min;
@@ -67,6 +67,64 @@ const random_rgba = () => {
   return vec4(Math.random(), Math.random(), Math.random(), 1.0);
 };
 
+const colorCube = (radius: number) => {
+  let points: matrix = [];
+  let colors: matrix = [];
+
+  const indices = [
+    [1, 0, 3, 2],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [6, 5, 1, 2],
+    [4, 5, 6, 7],
+    [5, 4, 0, 1],
+  ];
+
+  indices.forEach(([a, b, c, d]) => {
+    const [tp, tc] = quad(radius, a, b, c, d);
+    points.push(...tp);
+    colors.push(...tc);
+  });
+
+  return [points, colors];
+};
+
+const quad = (r: number, a: number, b: number, c: number, d: number) => {
+  let vertices = [
+    vec3(-r, -r, r),
+    vec3(-r, r, r),
+    vec3(r, r, r),
+    vec3(r, -r, r),
+    vec3(-r, -r, -r),
+    vec3(-r, r, -r),
+    vec3(r, r, -r),
+    vec3(r, -r, -r),
+  ];
+
+  let vertexColors = [
+    [0.0, 0.0, 0.0, 1.0], // black
+    [1.0, 0.0, 0.0, 1.0], // red
+    [1.0, 1.0, 0.0, 1.0], // yellow
+    [0.0, 1.0, 0.0, 1.0], // green
+    [0.0, 0.0, 1.0, 1.0], // blue
+    [1.0, 0.0, 1.0, 1.0], // magenta
+    [0.0, 1.0, 1.0, 1.0], // cyan
+    [1.0, 1.0, 1.0, 1.0], // white
+  ];
+
+  //vertex color assigned by the index of the vertex
+  const indices = [a, b, c, a, c, d];
+
+  let points = [];
+  let colors = [];
+  for (let i = 0; i < indices.length; ++i) {
+    points.push(vertices[indices[i]]);
+    colors.push(vertexColors[a]);
+  }
+
+  return [points, colors];
+};
+
 export {
   random_rgba,
   rand_between,
@@ -74,4 +132,5 @@ export {
   rect_from_coords,
   rect,
   sleep,
+  colorCube,
 };
