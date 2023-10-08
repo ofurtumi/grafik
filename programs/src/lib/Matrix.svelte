@@ -18,7 +18,7 @@
   <div class="matrix" style="--dimension: {dimension}">
     {#each matrix as row}
       {#each row as item}
-        <span>{item}</span>
+        <span>{item.toString().substring(0, 4)}</span>
       {/each}
     {/each}
   </div>
@@ -34,7 +34,7 @@
     grid-template-columns: repeat(var(--dimension), 1fr);
     grid-template-rows: repeat(var(--dimension), 1fr);
     place-items: center;
-    width: 200px;
+    min-width: 200px;
     aspect-ratio: 1;
     padding: 1em;
   }
@@ -43,8 +43,8 @@
     display: grid;
     grid-template-rows: repeat(var(--dimension), 1fr);
     place-items: center;
-    width: 100px;
-    height: 200px;
+    min-width: 100px;
+    min-height: 200px;
     padding: 1em;
   }
 
