@@ -26,10 +26,10 @@
     }
 
     const shaderProgram = initShaderProgram(gl, vs, fs);
-    buffer(gl, shaderProgram);
 
     if (!shaderProgram) return;
     gl.useProgram(shaderProgram);
+    buffer(gl, shaderProgram);
 
     if (num === undefined) {
       render(gl);

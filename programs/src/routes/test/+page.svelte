@@ -11,6 +11,9 @@
     mult,
     translate,
     type matrix,
+    perspective,
+    lookAt,
+    normalize,
   } from "$lib/MV";
   import Matrix from "$lib/Matrix.svelte";
   import Number from "$lib/Number.svelte";
@@ -32,9 +35,11 @@
   // matrix addition and subtraction
   let m_op_vals = new Array(4).fill(0);
   let v_op_vals = new Array(3).fill(0);
+  let v4_op_vals = new Array(4).fill(0);
 
   $: m_op_val = mat2(...m_op_vals);
   $: v_op_val = vec3(...v_op_vals);
+  $: v4_op_val = vec4(...v4_op_vals);
   const m_op_const = mat2(1, 2, 3, 4);
 
   $: t1 = translate(v3) as matrix;
@@ -189,6 +194,40 @@
     <Matrix matrix={v_op_val} dimension={3} />
     <p>=</p>
     <Matrix matrix={translate(v_op_vals)} dimension={4} />
+  </div>
+</div>
+
+<div class="flex column divider">
+  <h1>perspective(90, 1, 0.1, 100)</h1>
+  <div class="flex">
+    <Matrix matrix={perspective(90, 1, 0.1, 100)} dimension={4} />
+  </div>
+</div>
+
+<div class="flex column divider">
+  <h1>lookAt(v3, vec3(0,0,0), vec3(0,1,0))</h1>
+  <div class="flex">
+    {#each v_op_vals as _, i}
+      <Number bind:n={v_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix
+      matrix={lookAt(v_op_vals, vec3(0, 0, 0), vec3(0, 1, 0))}
+      dimension={4}
+    />
+  </div>
+</div>
+
+<div class="flex column divider">
+  <h1>normalize(v3)</h1>
+  <div class="flex">
+    {#each v_op_vals as _, i}
+      <Number bind:n={v_op_vals[i]} />
+    {/each}
+  </div>
+  <div class="flex">
+    <Matrix matrix={normalize(v_op_vals)} dimension={2} />
   </div>
 </div>
 
