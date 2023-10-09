@@ -189,7 +189,7 @@ export const mat4 = (...args: number[]): matrix => {
  */
 export const isMatrix = (m: matrix | vector): m is matrix => {
   if (Array.isArray((m as matrix)[0])) {
-    return m.length === ( m[0] as vector).length;
+    return m.length === (m[0] as vector).length;
   }
   return false;
 };
@@ -375,7 +375,7 @@ export const mult = (u: vector | matrix, v: vector | matrix) => {
 
     for (var i = 0; i < u.length; ++i) {
       result.push((u as vector)[i] * (v as vector)[i]);
-    } 
+    }
 
     return result;
   }
@@ -401,14 +401,13 @@ export const scale = (s: number, u: vector) => {
   return result;
 };
 
-
 /**
-* # Matrix scaling
-* @param v vector of length 3
-* @returns `matrix` that is the scaling matrix
-* @throws `string` if `v` is not a vector of length 3
-*/
-export const scalem = (v:vector) => {
+ * # Matrix scaling
+ * @param v vector of length 3
+ * @returns `matrix` that is the scaling matrix
+ * @throws `string` if `v` is not a vector of length 3
+ */
+export const scalem = (v: vector) => {
   const [x, y, z] = v;
 
   let result: matrix = mat4();
@@ -417,8 +416,7 @@ export const scalem = (v:vector) => {
   result[2][2] = z;
 
   return result;
-}
-
+};
 
 export const translate = (v: vector) => {
   const [x, y, z] = v;
@@ -429,23 +427,23 @@ export const translate = (v: vector) => {
   result[2][3] = z;
 
   return result;
-}
+};
 
-const transpose = ( m:matrix ) => {
-    if ( !isMatrix(m) ){
-      throw "transpose(): trying to transpose a non-matrix";
+const transpose = (m: matrix) => {
+  if (!isMatrix(m)) {
+    throw "transpose(): trying to transpose a non-matrix";
+  }
+
+  let result: matrix = [];
+  for (let i = 0; i < m.length; ++i) {
+    result.push([]);
+    for (let j = 0; j < m[0].length; ++j) {
+      result[i].push(m[j][i]);
     }
+  }
 
-    let result:matrix = [];
-    for ( let i = 0; i < m.length; ++i ) {
-      result.push([]);
-      for ( let j = 0; j < m[0].length; ++j ) {
-          result[i].push( m[j][i] );
-      }
-    }
-
-    return result;
-}
+  return result;
+};
 
 export const flatten = (v: matrix | vector) => {
   if (isMatrix(v)) {
@@ -464,8 +462,8 @@ export const flatten = (v: matrix | vector) => {
   if (EAA) {
     let idx = 0;
     for (let i = 0; i < v.length; ++i) {
-      for (let j = 0; j < ( v[i] as number[] ).length; ++j) {
-        floats[idx++] = ( v[i] as number[] )[j]
+      for (let j = 0; j < (v[i] as number[]).length; ++j) {
+        floats[idx++] = (v[i] as number[])[j];
       }
     }
   } else {
@@ -478,58 +476,94 @@ export const flatten = (v: matrix | vector) => {
 };
 
 /**
-* Part of a function group that returna a rotation matrix
-*
-* @param theta number of degrees to rotate by
-* @returns `matrix` that is the rotation matrix
-*/
+ * Part of a function group that returna a rotation matrix
+ *
+ * @param theta number of degrees to rotate by
+ * @returns `matrix` that is the rotation matrix
+ */
 export const rotateX = (theta: number) => {
-  const c = Math.cos( radians(theta) );
-  const s = Math.sin( radians(theta) );
+  const c = Math.cos(radians(theta));
+  const s = Math.sin(radians(theta));
   const rx = mat4(
-    1.0,  0.0,  0.0,  0.0,
-    0.0,  c,    -s,   0.0,
-    0.0,  s,    c,    0.0,
-    0.0,  0.0,  0.0,  1.0 
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    c,
+    -s,
+    0.0,
+    0.0,
+    s,
+    c,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
   );
   return rx;
-}
+};
 
 /**
-* Part of a function group that returna a rotation matrix
-*
-* @param theta number of degrees to rotate by
-* @returns `matrix` that is the rotation matrix
-*/
+ * Part of a function group that returna a rotation matrix
+ *
+ * @param theta number of degrees to rotate by
+ * @returns `matrix` that is the rotation matrix
+ */
 export const rotateY = (theta: number) => {
-  const c = Math.cos( radians(theta) );
-  const s = Math.sin( radians(theta) );
+  const c = Math.cos(radians(theta));
+  const s = Math.sin(radians(theta));
   const ry = mat4(
-    c,    0.0,  s,    0.0,
-    0.0,  1.0,  0.0,  0.0,
-    -s,   0.0,  c,    0.0,
-    0.0,  0.0,  0.0,  1.0 
+    c,
+    0.0,
+    s,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    -s,
+    0.0,
+    c,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
   );
   return ry;
-}
+};
 
 /**
-* Part of a function group that returna a rotation matrix
-*
-* @param theta number of degrees to rotate by
-* @returns `matrix` that is the rotation matrix
-*/
+ * Part of a function group that returna a rotation matrix
+ *
+ * @param theta number of degrees to rotate by
+ * @returns `matrix` that is the rotation matrix
+ */
 export const rotateZ = (theta: number) => {
-  const c = Math.cos( radians(theta) );
-  const s = Math.sin( radians(theta) );
-  const rz = mat4( 
-    c,    -s,   0.0,  0.0,
-    s,    c,    0.0,  0.0,
-    0.0,  0.0,  1.0,  0.0,
-    0.0,  0.0,  0.0,  1.0 
+  const c = Math.cos(radians(theta));
+  const s = Math.sin(radians(theta));
+  const rz = mat4(
+    c,
+    -s,
+    0.0,
+    0.0,
+    s,
+    c,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
   );
   return rz;
-}
+};
 
 export const rotateAll = (thetas: vector) => {
   let mat = mat4();
@@ -537,136 +571,141 @@ export const rotateAll = (thetas: vector) => {
   mat = mult(rotateY(thetas[1]), mat) as matrix;
   mat = mult(rotateZ(thetas[2]), mat) as matrix;
   return mat;
-}
+};
 
-export const perspective = ( fovy:number, aspect:number, near:number, far:number ) => {
-    let f = 1.0 / Math.tan( radians(fovy) / 2 );
-    let d = far - near;
+export const perspective = (
+  fovy: number,
+  aspect: number,
+  near: number,
+  far: number
+) => {
+  let f = 1.0 / Math.tan(radians(fovy) / 2);
+  let d = far - near;
 
-    const result = mat4();
-    result[0][0] = f / aspect;
-    result[1][1] = f;
-    result[2][2] = -(near + far) / d;
-    result[2][3] = -2 * near * far / d;
-    result[3][2] = -1;
-    result[3][3] = 0.0;
+  const result = mat4();
+  result[0][0] = f / aspect;
+  result[1][1] = f;
+  result[2][2] = -(near + far) / d;
+  result[2][3] = (-2 * near * far) / d;
+  result[3][2] = -1;
+  result[3][3] = 0.0;
 
-    return result;
-}
+  return result;
+};
 
-export const lookAt = ( eye:vector, at:vector, up:vector ) => {
-    if ( !Array.isArray(eye) || eye.length != 3) {
-        throw "lookAt(): first parameter [eye] must be an a vec3";
-    }
+export const lookAt = (eye: vector, at: vector, up: vector) => {
+  if (!Array.isArray(eye) || eye.length != 3) {
+    throw "lookAt(): first parameter [eye] must be an a vec3";
+  }
 
-    if ( !Array.isArray(at) || at.length != 3) {
-        throw "lookAt(): first parameter [at] must be an a vec3";
-    }
+  if (!Array.isArray(at) || at.length != 3) {
+    throw "lookAt(): first parameter [at] must be an a vec3";
+  }
 
-    if ( !Array.isArray(up) || up.length != 3) {
-        throw "lookAt(): first parameter [up] must be an a vec3";
-    }
+  if (!Array.isArray(up) || up.length != 3) {
+    throw "lookAt(): first parameter [up] must be an a vec3";
+  }
 
-    if ( equal(eye, at) ) {
-        return mat4();
-    }
+  if (equal(eye, at)) {
+    return mat4();
+  }
 
-    let v = normalize(subtract(at, eye) as vector);  // view direction vector
-    let n = normalize(cross(v, up)); // perpendicular vector
-    let u = normalize(cross(n, v)); // "new" up vector
+  let v = normalize(subtract(at, eye) as vector); // view direction vector
+  let n = normalize(cross(v, up)); // perpendicular vector
+  let u = normalize(cross(n, v)); // "new" up vector
 
-    v = negate( v );
+  v = negate(v);
 
-    let result = mat4(
-        ...vec4(...n, -dot(n, eye)),
-        ...vec4(...u, -dot(u, eye)),
-        ...vec4(...v, -dot(v, eye)),
-        ...vec4()
-    );
+  let result = mat4(
+    ...vec4(...n, -dot(n, eye)),
+    ...vec4(...u, -dot(u, eye)),
+    ...vec4(...v, -dot(v, eye)),
+    ...vec4()
+  );
 
-    return result;
-}
+  return result;
+};
 
-export const length = ( u: vector ) => {
-    return Math.sqrt( dot(u, u) );
-}
+export const length = (u: vector) => {
+  return Math.sqrt(dot(u, u));
+};
 
-export const normalize = ( u: vector, excludeLastComponent: boolean = false) => {
-    let result:vector = [];
-    u.forEach((x) => result.push(x));
+export const normalize = (u: vector, excludeLastComponent: boolean = false) => {
+  let result: vector = [];
+  u.forEach((x) => result.push(x));
 
-    let last = excludeLastComponent ? result.pop() : null;
+  let last = excludeLastComponent ? result.pop() : null;
 
-    let len = length(result)
+  let len = length(result);
 
-    if ( !isFinite(len) ) {
-        throw "normalize: vector " + u + " has zero length";
-    }
-    for ( let i = 0; i < result.length; ++i ) {
-        result[i] /= len;
-    }
-    if ( excludeLastComponent && last && typeof last === "number") {
-      result.push(last);
-    }
+  if (!isFinite(len)) {
+    throw "normalize: vector " + u + " has zero length";
+  }
+  for (let i = 0; i < result.length; ++i) {
+    result[i] /= len;
+  }
+  if (excludeLastComponent && last && typeof last === "number") {
+    result.push(last);
+  }
 
-    return result;
-}
+  return result;
+};
 
 /**
-* Calculates the cross product of two vectors
-*
-* @param u vector of length at least 3
-* @param v vector of length at least 3
-* @returns a 3d vector that is the cross product of `u` and `v`
-*/
-export const cross = ( u: vector, v: vector ) => {
-    if ( !Array.isArray(u) || u.length < 3 ) {
-        throw "cross(): first argument is not a vector of at least 3";
-    }
+ * Calculates the cross product of two vectors
+ *
+ * @param u vector of length at least 3
+ * @param v vector of length at least 3
+ * @returns a 3d vector that is the cross product of `u` and `v`
+ */
+export const cross = (u: vector, v: vector) => {
+  if (!Array.isArray(u) || u.length < 3) {
+    throw "cross(): first argument is not a vector of at least 3";
+  }
 
-    if ( !Array.isArray(v) || v.length < 3 ) {
-        throw "cross(): second argument is not a vector of at least 3";
-    }
+  if (!Array.isArray(v) || v.length < 3) {
+    throw "cross(): second argument is not a vector of at least 3";
+  }
 
-    const result = [
-        u[1]*v[2] - u[2]*v[1],
-        u[2]*v[0] - u[0]*v[2],
-        u[0]*v[1] - u[1]*v[0]
-    ];
+  const result = [
+    u[1] * v[2] - u[2] * v[1],
+    u[2] * v[0] - u[0] * v[2],
+    u[0] * v[1] - u[1] * v[0],
+  ];
 
-    return result;
-}
+  return result;
+};
 
 /*
  * Negates a given vector
-* for example the vector [1,2,-1] would become [-1,-2,1]
-* @param u vector to be negated
-* @returns `vector` that is the negated vector
-*/ 
-export const negate = ( u:vector ) => {
-    let result = [];
-    for ( let i = 0; i < u.length; ++i ) {
-        result.push( -u[i] );
-    }
+ * for example the vector [1,2,-1] would become [-1,-2,1]
+ * @param u vector to be negated
+ * @returns `vector` that is the negated vector
+ */
+export const negate = (u: vector) => {
+  let result = [];
+  for (let i = 0; i < u.length; ++i) {
+    result.push(-u[i]);
+  }
 
-    return result;
-}
+  return result;
+};
 
 /**
-* Calculates the dot product of two vectors
-  * @param u vector
-  * @param v vector
-  * @returns `number` that is the dot product of `u` and `v`
-  */
-export const dot = ( u: vector, v: vector ) => {
-    if ( u.length != v.length ) {
-        throw "dot(): vectors are not the same dimension";
-    }
+ * Calculates the dot product of two vectors
+ * @param u vector
+ * @param v vector
+ * @returns `number` that is the dot product of `u` and `v`
+ */
+export const dot = (u: vector, v: vector) => {
+  if (u.length != v.length) {
+    throw "dot(): vectors are not the same ";
+  }
 
-    let sum = 0.0;
-    for ( let i = 0; i < u.length; ++i ) {
-        sum += u[i] * v[i];
-    }
+  let sum = 0.0;
+  for (let i = 0; i < u.length; ++i) {
+    sum += u[i] * v[i];
+  }
 
-    return sum;
-}
+  return sum;
+};

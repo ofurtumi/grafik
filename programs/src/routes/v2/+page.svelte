@@ -13,13 +13,17 @@
     translate,
     type vector,
     mat4,
-    rotateAll,
-    degrees,
     normalize,
     add,
     scale,
+    rotateZ,
+    cross,
+    dot,
+    length,
+    degrees,
+    vec2,
+    scalem,
   } from "$lib/MV";
-  import { sleep } from "$lib/Helpers";
 
   // controls
   const mousedown = (e: MouseEvent) => {
@@ -27,8 +31,6 @@
     origin_x = e.offsetX;
     origin_y = e.offsetY;
   };
-
-  const bases = [vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1)];
 
   const mouseup = () => {
     movement = false;
@@ -59,6 +61,7 @@
     uniform mat4 modelview;
 
     void main() {
+      gl_PointSize = 5.0;
       gl_Position = projection * modelview * vPosition;
     }
   `;
@@ -85,12 +88,14 @@
     current: vector;
     direction: vector;
     tail: number;
+    wag_offset: number;
     speed: number;
+    color: vector;
+    rot_x: number;
+    rot_y: number;
   }
 
-  let offset = 0.0;
-
-  const fish_pos: fish_pos[] = new Array(30).fill(null).map((fish, id) => {
+  const fish_data: fish_pos[] = new Array(30).fill(null).map(() => {
     return {
       current: vec3(0, 0, 0),
       direction: vec3(
@@ -98,21 +103,26 @@
         Math.random() * 0.1 - 0.05,
         Math.random() * 0.1 - 0.05
       ),
-      speed: Math.random() * 0.1 - 0.05,
+      speed: (Math.random() * 2 - 1) * 2,
       tail: 0,
+      wag_offset: 10 * Math.random() - 5,
+      color: vec3(Math.random(), Math.random(), Math.random()),
+      rot_x: 0,
+      rot_y: 0,
     };
   });
 
   // buffer init
-  const NumVertices = 9;
   const num_body = 6;
   const num_tail = 3;
+  const num_fins = 3;
 
   let modelview: WebGLUniformLocation | null;
   let projection: WebGLUniformLocation | null;
   let color_loc: WebGLUniformLocation | null;
 
   let vertex_buffer: WebGLBuffer | null;
+  let box_buffer: WebGLBuffer | null;
   let vertex_pos: number | null;
 
   const buffer = (
@@ -132,6 +142,29 @@
       vec4(-0.5, 0.0, 0.0, 1.0),
       vec4(-0.65, 0.15, 0.0, 1.0),
       vec4(-0.65, -0.15, 0.0, 1.0),
+      // fins
+      vec4(0.0, 0.0, 0.0, 1.0),
+      vec4(0.1, 0.15, 0.0, 1.0),
+      vec4(-0.1, 0.15, 0.0, 1.0),
+    ];
+
+    const box = [
+      vec4(-10, 10, -10, 1.0),
+      vec4(-10, -10, -10, 1.0),
+      vec4(10, -10, -10, 1.0),
+      vec4(10, 10, -10, 1.0),
+      vec4(-10, 10, -10, 1.0),
+      vec4(-10, 10, 10, 1.0),
+      vec4(-10, -10, 10, 1.0),
+      vec4(10, -10, 10, 1.0),
+      vec4(10, 10, 10, 1.0),
+      vec4(-10, 10, 10, 1.0),
+      vec4(-10, -10, 10, 1.0),
+      vec4(-10, -10, -10, 1.0),
+      vec4(10, -10, -10, 1.0),
+      vec4(10, -10, 10, 1.0),
+      vec4(10, 10, 10, 1.0),
+      vec4(10, 10, -10, 1.0),
     ];
 
     // typechecking
@@ -143,18 +176,22 @@
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.enable(gl.DEPTH_TEST);
 
+    box_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, box_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(box), gl.STATIC_DRAW);
+
     vertex_buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
-
-    vertex_pos = gl.getAttribLocation(prog, "vPosition");
-    gl.vertexAttribPointer(vertex_pos, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vertex_pos);
 
     if (!prog) {
       console.error("No program");
       return;
     }
+
+    vertex_pos = gl.getAttribLocation(prog, "vPosition");
+    gl.vertexAttribPointer(vertex_pos, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vertex_pos);
 
     color_loc = gl.getUniformLocation(prog, "fColor");
     modelview = gl.getUniformLocation(prog, "modelview");
@@ -165,7 +202,14 @@
   };
 
   const render = async (gl: WebGLRenderingContext) => {
+    if (!vertex_pos && vertex_pos !== 0) {
+      console.error("No vertex pos");
+      return;
+    }
+
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+    gl.vertexAttribPointer(vertex_pos, 4, gl.FLOAT, false, 0, 0);
 
     let mv = lookAt(
       vec3(0.0, 0.0, z_view),
@@ -176,9 +220,15 @@
     mv = mult(mv, rotateX(rot_x)) as matrix;
     mv = mult(mv, rotateY(rot_y)) as matrix;
 
-    for (let id = 0; id < fish_pos.length; id++) {
-      fish(id, gl, mv, move_fish);
+    for (let id = 0; id < fish_data.length; id++) {
+      draw_fish(id, gl, mv, move_fish);
     }
+
+    gl.uniform4fv(color_loc, vec4(1.0, 1.0, 1.0, 1.0));
+    gl.bindBuffer(gl.ARRAY_BUFFER, box_buffer);
+    gl.vertexAttribPointer(vertex_pos, 4, gl.FLOAT, false, 0, 0);
+    gl.uniformMatrix4fv(modelview, false, flatten(mv));
+    gl.drawArrays(gl.LINE_STRIP, 0, 16);
 
     window.requestAnimationFrame(() => render(gl));
   };
@@ -186,61 +236,89 @@
   const move_fish = (id: number) => {
     let mat = mat4();
 
-    fish_pos[id].current.map((v, i) => {
-      if (v > 10.0 || v < -10.0) {
-        fish_pos[id].direction[i] *= -1;
+    fish_data[id].current.map((v, i) => {
+      if (v > 9.5 || v < -9.5) {
+        fish_data[id].direction[i] = -fish_data[id].direction[i];
       }
     });
 
-    fish_pos[id].current = add(
-      fish_pos[id].current,
-      fish_pos[id].direction
+    fish_data[id].current = add(
+      fish_data[id].current,
+      scale(0.2, normalize(fish_data[id].direction))
     ) as vector;
 
-    fish_pos[id].direction = scale(
-      0.1,
-      add(
-        normalize(fish_pos[id].direction),
-        vec3(
-          Math.random() * 0.1 - 0.05,
-          Math.random() * 0.1 - 0.05,
-          Math.random() * 0.1 - 0.05
-        )
-      ) as vector
+    // "RANDOM"
+    // fish_data[id].direction = add(
+    //   fish_data[id].direction,
+    //   vec3(1, 1, 2)
+    // ) as vector;
+
+    // RANDOM
+    fish_data[id].direction = add(
+      fish_data[id].direction,
+      vec3(
+        Math.random() * 0.1 - 0.05,
+        Math.random() * 0.1 - 0.05,
+        Math.random() * 0.1 - 0.05
+      )
     ) as vector;
 
-    mat = translate(fish_pos[id].current) as matrix;
+    fish_data[id].direction = fish_data[id].direction as vector;
+
+    const a = fish_data[id].current;
+    const b = fish_data[id].direction;
+    // console.log(degrees(Math.acos((dot(a, b) / length(a)) * length(b))));
+    mat = translate(fish_data[id].current) as matrix;
+    // mat = mult(
+    //   mat,
+    //   rotateY(degrees(Math.acos((dot(a, b) / length(a)) * length(b))))
+    // ) as matrix;
 
     return mat;
   };
 
-  const fish = (
+  const draw_fish = (
     id: number,
     gl: WebGLRenderingContext,
     mv: matrix,
     proj: (id: number) => matrix
   ) => {
-    const stats = fish_pos[id];
     mv = mult(mv, proj(id)) as matrix;
 
-    gl.uniform4fv(color_loc, vec4(1.0, 1.0, 1.0, 1.0));
+    // reverse tail
+    let stats = fish_data[id];
+    if (stats.tail > 35.0 || stats.tail < -35.0) {
+      fish_data[id].wag_offset = -stats.wag_offset;
+      stats = fish_data[id];
+    }
+
+    // gl.uniform4fv(color_loc, vec4(...stats.color, 1.0));
+    // gl.uniformMatrix4fv(modelview, false, flatten(mv));
+    // gl.drawArrays(gl.POINTS, 0, 1);
 
     // draw body
+    gl.uniform4fv(color_loc, vec4(...stats.color, 1.0));
     gl.uniformMatrix4fv(modelview, false, flatten(mv));
     gl.drawArrays(gl.TRIANGLES, 0, num_body);
 
     // draw tail
-    if (stats.tail > 35.0 || stats.tail < -35.0) {
-      stats.tail += stats.speed;
-    } else {
-      stats.tail -= stats.speed;
-    }
-    mv = mult(mv, translate(vec3(-0.5, 0.0, 0.0))) as matrix;
-    mv = mult(mv, rotateY(stats.tail)) as matrix;
-    mv = mult(mv, translate(vec3(0.5, 0.0, 0.0))) as matrix;
-
-    gl.uniformMatrix4fv(modelview, false, flatten(mv));
+    fish_data[id].tail += stats.wag_offset;
+    let mv_tail = mult(mv, translate(vec3(-0.5, 0.0, 0.0))) as matrix;
+    mv_tail = mult(mv_tail, rotateY(stats.tail)) as matrix;
+    mv_tail = mult(mv_tail, translate(vec3(0.5, 0.0, 0.0))) as matrix;
+    gl.uniformMatrix4fv(modelview, false, flatten(mv_tail));
     gl.drawArrays(gl.TRIANGLES, num_body, num_tail);
+
+    // draw fins
+    mv = mult(mv, translate(vec3(0.2, 0, 0))) as matrix;
+    mv = mult(mv, rotateX(90 + 0.5 * stats.tail)) as matrix;
+    gl.uniform4fv(color_loc, vec4(...stats.color.map((c) => c + 0.1), 1.0)); // aðeins að lýsa uggann
+    gl.uniformMatrix4fv(modelview, false, flatten(mv));
+    gl.drawArrays(gl.TRIANGLES, num_body + num_tail, num_fins);
+
+    mv = mult(mv, rotateX(-180 - stats.tail)) as matrix;
+    gl.uniformMatrix4fv(modelview, false, flatten(mv));
+    gl.drawArrays(gl.TRIANGLES, num_body + num_tail, num_fins);
   };
 </script>
 
