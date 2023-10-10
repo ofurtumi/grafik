@@ -89,7 +89,7 @@
   let num_fish = 10;
   let fish_scale = 2;
   $: border = 10 - fish_scale * 0.3;
-  let radius = 5;
+  let radius = 2.5;
 
   // fish specifics
   interface fish_pos {
@@ -293,6 +293,8 @@
         };
       });
 
+    if (neighbors.length === 0) return;
+
     // console.log(neighbors);
 
     let rev = vec3(0, 0, 0);
@@ -300,7 +302,7 @@
       rev = add(rev, scale(n.dist, n.dir)) as vector;
     });
 
-    rev.map((v) => {
+    rev = rev.map((v) => {
       return v / neighbors.length;
     });
 

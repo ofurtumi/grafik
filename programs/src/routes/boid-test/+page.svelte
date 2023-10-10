@@ -2,18 +2,14 @@
   import WebGl from "$lib/WebGL.svelte";
   import {
     add,
-    degrees,
     distance,
     flatten,
-    mult,
     negate,
     normalize,
-    radians,
     scale,
     vec2,
     type vector,
   } from "$lib/MV";
-  import { rect_from_coords } from "$lib/Helpers";
 
   let vPosition: number;
   let colorLoc: WebGLUniformLocation | null;
@@ -35,7 +31,12 @@
   let ball_direction = new Array(500)
     .fill(null)
     .map((_) => normalize(start_direction()));
-  let ball_locations = new Array(500).fill(null).map((_) => start_direction());
+  let ball_locations = new Array(500).fill(null).map((_) =>
+    start_direction().map((i) => {
+      return i * 4;
+    })
+  );
+  let ball_rotations = new Array(500).fill(null).map((_) => 0);
 
   const vs = `
   uniform vec2 offset;
@@ -106,6 +107,7 @@
       gl.uniform4f(colorLoc, 1, 1, 1, 1);
       gl.uniform1f(rotLoc, 0);
 
+      flock(i);
       const [dx, dy] = ball_direction[i];
       ball_locations[i][0] += dx * ball_speed;
       ball_locations[i][1] += dy * ball_speed;
@@ -125,12 +127,46 @@
 
       // rotate arrow
       [cx, cy] = ball_locations[i];
-      let angle = Math.atan2(dy, dx);
-      gl.uniform1f(rotLoc, angle);
+      ball_rotations[i] = Math.atan2(dy, dx);
+      gl.uniform1f(rotLoc, ball_rotations[i]);
 
       gl.drawArrays(gl.LINES, 0, 2);
     }
     window.requestAnimationFrame(() => render(gl));
+  };
+
+  const flock = (id: number) => {
+    const current = ball_locations[id];
+    const neighbors = ball_locations
+      .slice(0, num_balls)
+      .filter((d, i) => {
+        if (i === id) return false;
+        if (distance(current, d) <= ball_radius) {
+          if (
+            Math.abs(ball_rotations[id] - ball_rotations[i]) <= 45 ||
+            Math.abs(ball_rotations[id] + ball_rotations[i]) <= 45
+          )
+            return true;
+        }
+        return false;
+      })
+      .map((d) => {
+        return { dist: ball_radius - distance(current, d), loc: d };
+      });
+
+    if (neighbors.length === 0) return;
+
+    let reverse = vec2(0, 0);
+    neighbors.forEach((n: { dist: number; loc: vector }) => {
+      reverse = add(reverse, scale(n.dist, n.loc)) as vector;
+    });
+
+    reverse.map((v) => {
+      return v / neighbors.length;
+    });
+
+    reverse = negate(reverse);
+    ball_direction[id] = normalize(add(reverse, ball_direction[id]) as vector);
   };
 </script>
 
@@ -144,6 +180,7 @@
   type="range"
   bind:value={ball_radius}
   min="0.1"
-  max="500"
+  max="0.3"
+  step="0.05"
 />
 <label for="ball_radius">Ball radius: {ball_radius}</label>
