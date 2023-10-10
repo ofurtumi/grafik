@@ -18,6 +18,9 @@
     scale,
     degrees,
     scalem,
+    distance,
+    negate,
+    cross,
   } from "$lib/MV";
 
   // controls
@@ -83,9 +86,10 @@
 
   // settings
   let z_view = 25.0;
-  const num_fish = 10;
-  const fish_scale = 5;
-  const border = 10 - fish_scale * 0.3;
+  let num_fish = 10;
+  let fish_scale = 2;
+  $: border = 10 - fish_scale * 0.3;
+  let radius = 5;
 
   // fish specifics
   interface fish_pos {
@@ -99,15 +103,19 @@
     rot_y: number;
   }
 
-  const fish_data: fish_pos[] = new Array(num_fish).fill(null).map(() => {
+  const fish_data: fish_pos[] = new Array(50).fill(null).map(() => {
     return {
-      current: vec3(0, 0, 0),
+      current: vec3(
+        Math.random() * 10 - 5,
+        Math.random() * 10 - 5,
+        Math.random() * 10 - 5
+      ),
       direction: vec3(
         Math.random() * 0.1 - 0.05,
-        Math.random() * 0.1 - 0.05,
+        Math.random() * 0.05 - 0.025,
         Math.random() * 0.1 - 0.05
       ),
-      speed: Math.random() * 0.3 + 0.1,
+      speed: Math.random() * 0.2 + 0.1,
       tail: 0,
       wag_offset: 10 * Math.random() - 5,
       color: vec3(Math.random(), Math.random(), Math.random()),
@@ -227,7 +235,7 @@
     mv = mult(mv, rotateX(rot_x)) as matrix;
     mv = mult(mv, rotateY(rot_y)) as matrix;
 
-    for (let id = 0; id < fish_data.length; id++) {
+    for (let id = 0; id < num_fish; id++) {
       draw_fish(id, gl, mv, move_fish);
     }
 
@@ -245,7 +253,7 @@
 
     fish_data[id].current.map((v, i) => {
       if (v > border || v < -border) {
-        fish_data[id].direction[i] = -fish_data[id].direction[i];
+        fish_data[id].current[i] = -fish_data[id].current[i];
       }
     });
 
@@ -261,9 +269,45 @@
 
     mat = mult(mat, translate(fish_data[id].current)) as matrix;
     mat = mult(mat, rotateY(-deg)) as matrix;
-    mat = mult(mat, scalem(vec3(5, 5, 5))) as matrix;
+    mat = mult(mat, scalem(vec3(fish_scale, fish_scale, fish_scale))) as matrix;
 
     return mat;
+  };
+
+  const flocking = (id: number) => {
+    // find all fish within 5 units
+    const current = fish_data[id].current;
+    const neighbors = fish_data
+      .slice(0, num_fish)
+      .filter((d, i) => {
+        if (i === id) return false;
+        if (distance(current, d.current) <= radius) {
+          return true;
+        }
+        return false;
+      })
+      .map((b) => {
+        return {
+          dist: radius - distance(current, b.current),
+          dir: normalize(add(b.current, negate(current)) as vector),
+        };
+      });
+
+    // console.log(neighbors);
+
+    let rev = vec3(0, 0, 0);
+    neighbors.forEach((n: { dist: number; dir: vector }) => {
+      rev = add(rev, scale(n.dist, n.dir)) as vector;
+    });
+
+    rev.map((v) => {
+      return v / neighbors.length;
+    });
+
+    rev = negate(rev);
+    fish_data[id].direction = normalize(
+      add(rev, fish_data[id].direction) as vector
+    );
   };
 
   const draw_fish = (
@@ -272,6 +316,7 @@
     mv: matrix,
     proj: (id: number) => matrix
   ) => {
+    flocking(id);
     mv = mult(mv, proj(id)) as matrix;
 
     // reverse tail
@@ -315,5 +360,28 @@
 >
   <WebGl {vs} {fs} {buffer} {render} num={undefined} />
 </div>
+
+<input type="range" min="1" max="50" bind:value={num_fish} id="num_fish" />
+<label for="num_fish">Number of fish: {num_fish}</label>
+
+<input
+  type="range"
+  min="1"
+  max="5"
+  step="0.25"
+  bind:value={radius}
+  id="radius"
+/>
+<label for="num_fish">Negative rizz: {radius}</label>
+
+<input
+  type="range"
+  min="1"
+  max="5"
+  step="0.5"
+  bind:value={fish_scale}
+  id="fish_scale"
+/>
+<label for="num_fish">Fish size: {fish_scale}</label>
 
 <svelte:window on:keydown={keydown} />

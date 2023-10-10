@@ -33,8 +33,26 @@ export const degrees = (rads: number) => {
   return (rads * 180.0) / Math.PI;
 };
 
-//  Vector Constructors
+/**
+* Calculates the distance between two vectors
+* @param u vector
+* @param v vector
+* @returns `number` that is the distance between `u` and `v`
+*/
+export const distance = (u: vector, v: vector) => {
+  if (u.length != v.length) {
+    throw "distance(): vectors are not the same dimension";
+  }
 
+  let sum = 0.0;
+
+  for (let i = 0; i < u.length; ++i) {
+    sum += Math.pow(u[i] - v[i], 2);
+  }
+  return Math.sqrt(sum);
+}
+
+//  Vector Constructors
 /**
  * Vector of length 2
  * @param args numbers to be put into the vector, parametrs `n > 2` are ignored
@@ -418,8 +436,12 @@ export const scalem = (v: vector) => {
   return result;
 };
 
-export const translate = (v: vector) => {
-  const [x, y, z] = v;
+export const translate = (
+  v: vector | number,
+  y_: number | null = null,
+  z_: number | null = null
+) => {
+  const [x, y, z] = (v as vector) ?? [v as number, y_ ?? 0, z_ ?? 0];
 
   let result = mat4();
   result[0][3] = x;
