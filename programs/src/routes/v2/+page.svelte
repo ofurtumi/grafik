@@ -20,7 +20,7 @@
     scalem,
     distance,
     negate,
-    cross,
+    rotateZ,
   } from "$lib/MV";
 
   // controls
@@ -90,6 +90,7 @@
   let fish_scale = 2;
   $: border = 10 - fish_scale * 0.3;
   let radius = 2.5;
+  let global_speed = 1;
 
   // fish specifics
   interface fish_pos {
@@ -125,7 +126,7 @@
   });
 
   // buffer init
-  const num_body = 6;
+  const num_body = 13;
   const num_tail = 3;
   const num_fins = 3;
 
@@ -145,13 +146,22 @@
     const vertices = [
       vec4(-0.5, 0.0, 0.0, 1.0),
       vec4(0.2, 0.2, 0.0, 1.0),
+      vec4(0.2, 0.0, -0.2, 1.0),
       vec4(0.5, 0.0, 0.0, 1.0),
-      vec4(0.5, 0.0, 0.0, 1.0),
-      vec4(0.2, -0.15, 0.0, 1.0),
+      vec4(0.2, -0.2, 0.0, 1.0),
+      vec4(0.2, 0.0, -0.2, 1.0),
       vec4(-0.5, 0.0, 0.0, 1.0),
+      vec4(0.2, 0.2, 0.0, 1.0),
+      vec4(0.2, 0.0, 0.2, 1.0),
+      vec4(0.5, 0.0, 0.0, 1.0),
+      vec4(0.2, -0.2, 0.0, 1.0),
+      vec4(0.2, 0.0, 0.2, 1.0),
+      vec4(-0.5, 0.0, 0.0, 1.0),
+      // sporður
       vec4(-0.5, 0.0, 0.0, 1.0),
       vec4(-0.65, 0.15, 0.0, 1.0),
       vec4(-0.65, -0.15, 0.0, 1.0),
+      // uggi
       vec4(0.0, 0.0, 0.0, 1.0),
       vec4(0.1, 0.15, 0.0, 1.0),
       vec4(-0.1, 0.15, 0.0, 1.0),
@@ -259,7 +269,10 @@
 
     fish_data[id].current = add(
       fish_data[id].current,
-      scale(fish_data[id].speed, normalize(fish_data[id].direction))
+      scale(
+        fish_data[id].speed * global_speed,
+        normalize(fish_data[id].direction)
+      )
     ) as vector;
 
     const [xd, _, zd] = normalize(fish_data[id].direction);
@@ -272,44 +285,6 @@
     mat = mult(mat, scalem(vec3(fish_scale, fish_scale, fish_scale))) as matrix;
 
     return mat;
-  };
-
-  const flocking = (id: number) => {
-    // find all fish within 5 units
-    const current = fish_data[id].current;
-    const neighbors = fish_data
-      .slice(0, num_fish)
-      .filter((d, i) => {
-        if (i === id) return false;
-        if (distance(current, d.current) <= radius) {
-          return true;
-        }
-        return false;
-      })
-      .map((b) => {
-        return {
-          dist: radius - distance(current, b.current),
-          dir: normalize(add(b.current, negate(current)) as vector),
-        };
-      });
-
-    if (neighbors.length === 0) return;
-
-    // console.log(neighbors);
-
-    let rev = vec3(0, 0, 0);
-    neighbors.forEach((n: { dist: number; dir: vector }) => {
-      rev = add(rev, scale(n.dist, n.dir)) as vector;
-    });
-
-    rev = rev.map((v) => {
-      return v / neighbors.length;
-    });
-
-    rev = negate(rev);
-    fish_data[id].direction = normalize(
-      add(rev, fish_data[id].direction) as vector
-    );
   };
 
   const draw_fish = (
@@ -331,7 +306,7 @@
     // draw body
     gl.uniform4fv(color_loc, vec4(...stats.color, 1.0));
     gl.uniformMatrix4fv(modelview, false, flatten(mv));
-    gl.drawArrays(gl.TRIANGLES, 0, num_body);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, num_body);
 
     // draw tail
     fish_data[id].tail += stats.wag_offset;
@@ -342,15 +317,52 @@
     gl.drawArrays(gl.TRIANGLES, num_body, num_tail);
 
     // draw fins
-    mv = mult(mv, translate(vec3(0.2, 0, 0))) as matrix;
-    mv = mult(mv, rotateX(90 + 0.5 * stats.tail)) as matrix;
-    gl.uniform4fv(color_loc, vec4(...stats.color.map((c) => c + 0.1), 1.0)); // aðeins að lýsa uggann
-    gl.uniformMatrix4fv(modelview, false, flatten(mv));
+    let mv_r = mult(mv, translate(vec3(0.2, 0, 0.2))) as matrix;
+    mv_r = mult(mv_r, rotateZ(90)) as matrix;
+    mv_r = mult(mv_r, rotateX(45 + 0.5 * stats.tail)) as matrix;
+    gl.uniformMatrix4fv(modelview, false, flatten(mv_r));
     gl.drawArrays(gl.TRIANGLES, num_body + num_tail, num_fins);
 
-    mv = mult(mv, rotateX(-180 - stats.tail)) as matrix;
-    gl.uniformMatrix4fv(modelview, false, flatten(mv));
+    let mv_l = mult(mv, translate(vec3(0.2, 0, -0.2))) as matrix;
+    mv_l = mult(mv_l, rotateZ(90)) as matrix;
+    mv_l = mult(mv_l, rotateX(-45 - 0.5 * stats.tail)) as matrix;
+    gl.uniformMatrix4fv(modelview, false, flatten(mv_l));
     gl.drawArrays(gl.TRIANGLES, num_body + num_tail, num_fins);
+  };
+
+  const flocking = (id: number) => {
+    const current = fish_data[id].current;
+    const neighbors = fish_data
+      .slice(0, num_fish)
+      .filter((d, i) => {
+        if (i === id) return false;
+        if (distance(current, d.current) <= radius) {
+          return true;
+        }
+        return false;
+      })
+      .map((b) => {
+        return {
+          dist: radius - distance(current, b.current),
+          dir: normalize(add(b.current, negate(current)) as vector),
+        };
+      });
+
+    if (neighbors.length === 0) return;
+
+    let rev = vec3(0, 0, 0);
+    neighbors.forEach((n: { dist: number; dir: vector }) => {
+      rev = add(rev, scale(n.dist, n.dir)) as vector;
+    });
+
+    rev = rev.map((v) => {
+      return v / neighbors.length;
+    });
+
+    rev = negate(rev);
+    fish_data[id].direction = normalize(
+      add(rev, fish_data[id].direction) as vector
+    );
   };
 </script>
 
@@ -374,7 +386,7 @@
   bind:value={radius}
   id="radius"
 />
-<label for="num_fish">Negative rizz: {radius}</label>
+<label for="num_fish">Neighbor radius: {radius}</label>
 
 <input
   type="range"
@@ -385,5 +397,15 @@
   id="fish_scale"
 />
 <label for="num_fish">Fish size: {fish_scale}</label>
+
+<input
+  type="range"
+  min="0.0"
+  max="2"
+  step="0.1"
+  bind:value={global_speed}
+  id="fish_speed"
+/>
+<label for="fish_speed">Fish speed: {global_speed}</label>
 
 <svelte:window on:keydown={keydown} />

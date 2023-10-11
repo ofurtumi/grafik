@@ -91,6 +91,7 @@
     height: 100%;
     border-right: var(--border);
     gap: 1rem;
+    overflow-y: scroll;
   }
 
   .category {

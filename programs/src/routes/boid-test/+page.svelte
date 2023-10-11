@@ -25,8 +25,10 @@
   };
 
   let num_balls = 1;
-  let ball_speed = 0.01;
+  let speed = 1;
+  $: ball_speed = speed * 0.01;
   let ball_radius = 0.1;
+  let show_arrow = false;
 
   let ball_direction = new Array(500)
     .fill(null)
@@ -45,7 +47,7 @@
 
   void main()
   {
-    gl_PointSize = 10.0;
+    gl_PointSize = 5.0;
     vec4 t = vPosition; 
     
     vec2 r = vec2(t.x*cos(rot) - t.y*sin(rot),t.x*sin(rot) + t.y*cos(rot));
@@ -108,7 +110,7 @@
       gl.uniform1f(rotLoc, 0);
 
       flock(i);
-      const [dx, dy] = ball_direction[i];
+      const [dx, dy] = normalize(ball_direction[i]);
       ball_locations[i][0] += dx * ball_speed;
       ball_locations[i][1] += dy * ball_speed;
       let [cx, cy] = ball_locations[i];
@@ -125,28 +127,26 @@
       gl.bindBuffer(gl.ARRAY_BUFFER, arrow_buffer);
       gl.uniform4f(colorLoc, 1, 0, 1, 1);
 
-      // rotate arrow
-      [cx, cy] = ball_locations[i];
-      ball_rotations[i] = Math.atan2(dy, dx);
-      gl.uniform1f(rotLoc, ball_rotations[i]);
+      if (show_arrow) {
+        // rotate arrow
+        [cx, cy] = ball_locations[i];
+        ball_rotations[i] = Math.atan2(dy, dx);
+        gl.uniform1f(rotLoc, ball_rotations[i]);
 
-      gl.drawArrays(gl.LINES, 0, 2);
+        gl.drawArrays(gl.LINES, 0, 2);
+      }
     }
     window.requestAnimationFrame(() => render(gl));
   };
 
   const flock = (id: number) => {
-    const current = ball_locations[id];
+    const current = scale(ball_speed, normalize(ball_locations[id]));
     const neighbors = ball_locations
       .slice(0, num_balls)
       .filter((d, i) => {
         if (i === id) return false;
         if (distance(current, d) <= ball_radius) {
-          if (
-            Math.abs(ball_rotations[id] - ball_rotations[i]) <= 45 ||
-            Math.abs(ball_rotations[id] + ball_rotations[i]) <= 45
-          )
-            return true;
+          return true;
         }
         return false;
       })
@@ -166,7 +166,7 @@
     });
 
     reverse = negate(reverse);
-    ball_direction[id] = normalize(add(reverse, ball_direction[id]) as vector);
+    ball_direction[id] = add(reverse, ball_direction[id]) as vector;
   };
 </script>
 
@@ -174,6 +174,16 @@
 
 <input id="num_balls" type="range" bind:value={num_balls} min="1" max="500" />
 <label for="num_balls">Number of balls: {num_balls}</label>
+
+<input
+  id="ball_speed"
+  type="range"
+  bind:value={speed}
+  min="0.5"
+  max="5"
+  step="0.1"
+/>
+<label for="num_balls">Ball speed: {speed}</label>
 
 <input
   id="ball_radius"
@@ -184,3 +194,6 @@
   step="0.05"
 />
 <label for="ball_radius">Ball radius: {ball_radius}</label>
+
+<input id="show_arrow" type="checkbox" bind:checked={show_arrow} />
+<label for="show_arrow">Show arrow</label>
