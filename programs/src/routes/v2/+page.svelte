@@ -91,6 +91,7 @@
   $: border = 10 - fish_scale * 0.3;
   let radius = 2.5;
   let global_speed = 1;
+  let wireframe = false;
 
   // fish specifics
   interface fish_pos {
@@ -126,7 +127,7 @@
   });
 
   // buffer init
-  const num_body = 13;
+  const num_body = 17;
   const num_tail = 3;
   const num_fins = 3;
 
@@ -148,6 +149,10 @@
       vec4(0.2, 0.2, 0.0, 1.0),
       vec4(0.2, 0.0, -0.2, 1.0),
       vec4(0.5, 0.0, 0.0, 1.0),
+      vec4(0.5, 0.0, 0.0, 1.0),
+      vec4(0.2, 0.2, 0.0, 1.0),
+      vec4(0.2, -0.2, 0.0, 1.0),
+      vec4(-0.5, 0.0, 0.0, 1.0),
       vec4(0.2, -0.2, 0.0, 1.0),
       vec4(0.2, 0.0, -0.2, 1.0),
       vec4(-0.5, 0.0, 0.0, 1.0),
@@ -306,7 +311,14 @@
     // draw body
     gl.uniform4fv(color_loc, vec4(...stats.color, 1.0));
     gl.uniformMatrix4fv(modelview, false, flatten(mv));
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, num_body);
+    if (wireframe) {
+      gl.drawArrays(gl.LINE_LOOP, 0, num_body);
+    } else {
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, num_body);
+    }
+
+    // lighten extremities
+    gl.uniform4fv(color_loc, vec4(...stats.color.map((c) => c * 1.1), 1.0));
 
     // draw tail
     fish_data[id].tail += stats.wag_offset;
@@ -407,5 +419,8 @@
   id="fish_speed"
 />
 <label for="fish_speed">Fish speed: {global_speed}</label>
+
+<input id="wireframe" type="checkbox" bind:checked={wireframe} />
+<label for="wireframe">wireframe fish bodies</label>
 
 <svelte:window on:keydown={keydown} />
