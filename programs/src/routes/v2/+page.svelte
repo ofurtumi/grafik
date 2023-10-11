@@ -86,12 +86,15 @@
 
   // settings
   let z_view = 25.0;
-  let num_fish = 10;
-  let fish_scale = 2;
+  let num_fish = 300;
+  let fish_scale = 1;
   $: border = 10 - fish_scale * 0.3;
-  let radius = 2.5;
-  let global_speed = 1;
+  let radius = 2.25;
+  let global_speed = 0.3;
   let wireframe = false;
+  let sep_str = 4.25;
+  let ali_str = 2.25;
+  let coh_str = 1.75;
 
   // fish specifics
   interface fish_pos {
@@ -108,9 +111,9 @@
   const fish_data: fish_pos[] = new Array(500).fill(null).map(() => {
     return {
       current: vec3(
-        Math.random() * 10 - 5,
-        Math.random() * 10 - 5,
-        Math.random() * 10 - 5
+        Math.random() * 18 - 9,
+        Math.random() * 18 - 9,
+        Math.random() * 18 - 9
       ),
       direction: vec3(
         Math.random() * 0.1 - 0.05,
@@ -376,69 +379,112 @@
       }
     );
 
-    pos_avg = pos_avg.map((v) => {
-      return v / neighbors.length;
-    });
-
     // Seperation
     rev_avg = rev_avg.map((v) => v / neighbors.length);
-
     rev_avg = negate(rev_avg);
-    fish_data[id].direction = normalize(
-      add(rev_avg, fish_data[id].direction) as vector
-    );
 
     // Alignment
     dirs_avg = dirs_avg.map((v) => v / neighbors.length);
+
+    // Cohesion
+    pos_avg = pos_avg.map((v) => v / neighbors.length);
+
+    pos_avg = add(pos_avg, negate(current)) as vector;
+    let [pos_x, pos_y, pos_z] = pos_avg;
+    let pos_mag = Math.sqrt(pos_x * pos_x + pos_y * pos_y + pos_z * pos_z);
+    if (pos_mag > 0) {
+      pos_avg = pos_avg.map((v) => v / pos_mag);
+    }
+
+    const flocking_vector = vec3(
+      sep_str * rev_avg[0] + ali_str * dirs_avg[0] + coh_str * pos_avg[0],
+      sep_str * rev_avg[1] + ali_str * dirs_avg[1] + coh_str * pos_avg[1],
+      sep_str * rev_avg[2] + ali_str * dirs_avg[2] + coh_str * pos_avg[2]
+    );
+
     fish_data[id].direction = normalize(
-      add(dirs_avg, fish_data[id].direction) as vector
+      add(flocking_vector, fish_data[id].direction) as vector
     );
   };
 </script>
 
-<div
-  on:mousedown|preventDefault={mousedown}
-  on:mouseup|preventDefault={mouseup}
-  on:mousemove|preventDefault={mousemove}
-  on:wheel={mousescroll}
->
-  <WebGl {vs} {fs} {buffer} {render} num={undefined} />
+<div class="flex">
+  <div
+    on:mousedown|preventDefault={mousedown}
+    on:mouseup|preventDefault={mouseup}
+    on:mousemove|preventDefault={mousemove}
+    on:wheel={mousescroll}
+  >
+    <WebGl {vs} {fs} {buffer} {render} num={undefined} />
+  </div>
+
+  <div class="flex column">
+    <input type="range" min="1" max="500" bind:value={num_fish} id="num_fish" />
+    <label for="num_fish">Number of fish: {num_fish}</label>
+
+    <input
+      type="range"
+      min="1"
+      max="5"
+      step="0.25"
+      bind:value={radius}
+      id="radius"
+    />
+    <label for="num_fish">Neighbor radius: {radius}</label>
+
+    <input
+      type="range"
+      min="0.25"
+      max="5"
+      step="0.25"
+      bind:value={fish_scale}
+      id="fish_scale"
+    />
+    <label for="num_fish">Fish size: {fish_scale}</label>
+
+    <input
+      type="range"
+      min="0.0"
+      max="2"
+      step="0.1"
+      bind:value={global_speed}
+      id="fish_speed"
+    />
+    <label for="fish_speed">Fish speed: {global_speed}</label>
+
+    <input id="wireframe" type="checkbox" bind:checked={wireframe} />
+    <label for="wireframe">wireframe fish bodies</label>
+
+    <input
+      type="range"
+      min="0"
+      max="10"
+      bind:value={sep_str}
+      step="0.25"
+      id="sep_str"
+    />
+    <label for="sep_str">Seperation strength: {sep_str}</label>
+
+    <input
+      type="range"
+      min="0"
+      max="10"
+      bind:value={ali_str}
+      step="0.25"
+      id="ali_str"
+    />
+    <label for="ali_str">Alignment strength: {ali_str}</label>
+
+    <input
+      type="range"
+      min="0"
+      max="10"
+      bind:value={coh_str}
+      step="0.25"
+      id="coh_str"
+    />
+    <label for="coh_str">Cohesion strength: {coh_str}</label>
+  </div>
 </div>
-
-<input type="range" min="1" max="500" bind:value={num_fish} id="num_fish" />
-<label for="num_fish">Number of fish: {num_fish}</label>
-
-<input
-  type="range"
-  min="1"
-  max="5"
-  step="0.25"
-  bind:value={radius}
-  id="radius"
-/>
-<label for="num_fish">Neighbor radius: {radius}</label>
-
-<input
-  type="range"
-  min="0.25"
-  max="5"
-  step="0.25"
-  bind:value={fish_scale}
-  id="fish_scale"
-/>
-<label for="num_fish">Fish size: {fish_scale}</label>
-
-<input
-  type="range"
-  min="0.0"
-  max="2"
-  step="0.1"
-  bind:value={global_speed}
-  id="fish_speed"
-/>
-<label for="fish_speed">Fish speed: {global_speed}</label>
-
-<input id="wireframe" type="checkbox" bind:checked={wireframe} />
-<label for="wireframe">wireframe fish bodies</label>
 
 <svelte:window on:keydown={keydown} />

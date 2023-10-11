@@ -141,32 +141,42 @@
 
   const flock = (id: number) => {
     const current = scale(ball_speed, normalize(ball_locations[id]));
+    let ids: number[] = [];
     const neighbors = ball_locations
       .slice(0, num_balls)
       .filter((d, i) => {
         if (i === id) return false;
         if (distance(current, d) <= ball_radius) {
+          ids.push(i);
           return true;
         }
         return false;
       })
-      .map((d) => {
-        return { dist: ball_radius - distance(current, d), loc: d };
+      .map((d, i) => {
+        return {
+          dist: ball_radius - distance(current, d),
+          loc: d,
+          dir: ball_direction[i],
+        };
       });
 
     if (neighbors.length === 0) return;
 
     let reverse = vec2(0, 0);
-    neighbors.forEach((n: { dist: number; loc: vector }) => {
+    let direction = vec2(0, 0);
+
+    neighbors.forEach((n: { dist: number; loc: vector; dir: vector }) => {
       reverse = add(reverse, scale(n.dist, n.loc)) as vector;
+      direction = add(direction, n.dir) as vector;
     });
 
+    // seperation
     reverse.map((v) => {
       return v / neighbors.length;
     });
 
     reverse = negate(reverse);
-    ball_direction[id] = add(reverse, ball_direction[id]) as vector;
+    ball_direction[id] = normalize(add(reverse, ball_direction[id]) as vector);
   };
 </script>
 
