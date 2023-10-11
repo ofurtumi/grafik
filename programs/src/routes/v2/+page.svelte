@@ -270,7 +270,7 @@
     let mat = mat4();
 
     fish_data[id].current.map((v, i) => {
-      if (v > border || v < -border) {
+      if (v >= border || v <= -border) {
         fish_data[id].current[i] = -fish_data[id].current[i];
       }
     });
@@ -321,7 +321,7 @@
     }
 
     // lighten extremities
-    gl.uniform4fv(color_loc, vec4(...stats.color.map((c) => c * 1.1), 1.0));
+    gl.uniform4fv(color_loc, vec4(...stats.color.map((c) => c * 1.2), 1.0));
 
     // draw tail
     fish_data[id].tail += stats.wag_offset;
@@ -408,6 +408,8 @@
   };
 </script>
 
+<h1>3D boids baby</h1>
+<h2>Hermilíkan sem apar eftir hópun fiska</h2>
 <div class="flex">
   <div
     on:mousedown|preventDefault={mousedown}
@@ -424,16 +426,6 @@
 
     <input
       type="range"
-      min="1"
-      max="5"
-      step="0.25"
-      bind:value={radius}
-      id="radius"
-    />
-    <label for="num_fish">Neighbor radius: {radius}</label>
-
-    <input
-      type="range"
       min="0.25"
       max="5"
       step="0.25"
@@ -441,6 +433,16 @@
       id="fish_scale"
     />
     <label for="num_fish">Fish size: {fish_scale}</label>
+
+    <input
+      type="range"
+      min="1"
+      max="5"
+      step="0.25"
+      bind:value={radius}
+      id="radius"
+    />
+    <label for="num_fish">Detection radius: {radius}</label>
 
     <input
       type="range"
