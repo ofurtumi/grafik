@@ -105,7 +105,7 @@
     rot_y: number;
   }
 
-  const fish_data: fish_pos[] = new Array(50).fill(null).map(() => {
+  const fish_data: fish_pos[] = new Array(500).fill(null).map(() => {
     return {
       current: vec3(
         Math.random() * 10 - 5,
@@ -281,12 +281,12 @@
     ) as vector;
 
     const [xd, _, zd] = normalize(fish_data[id].direction);
-    const deg = degrees(Math.atan2(zd, xd));
+    const degZX = degrees(Math.atan2(zd, xd));
 
     fish_data[id].direction = fish_data[id].direction as vector;
 
     mat = mult(mat, translate(fish_data[id].current)) as matrix;
-    mat = mult(mat, rotateY(-deg)) as matrix;
+    mat = mult(mat, rotateY(-degZX)) as matrix;
     mat = mult(mat, scalem(vec3(fish_scale, fish_scale, fish_scale))) as matrix;
 
     return mat;
@@ -356,24 +356,42 @@
       .map((b) => {
         return {
           dist: radius - distance(current, b.current),
-          dir: normalize(add(b.current, negate(current)) as vector),
+          dest: add(b.current, negate(current)) as vector,
+          dirs: b.direction,
+          cons: b.current,
         };
       });
 
     if (neighbors.length === 0) return;
 
-    let rev = vec3(0, 0, 0);
-    neighbors.forEach((n: { dist: number; dir: vector }) => {
-      rev = add(rev, scale(n.dist, n.dir)) as vector;
-    });
+    let rev_avg = vec3(0, 0, 0);
+    let dirs_avg = vec3(0, 0, 0);
+    let pos_avg = vec3(0, 0, 0);
 
-    rev = rev.map((v) => {
+    neighbors.forEach(
+      (n: { dist: number; dest: vector; cons: vector; dirs: vector }) => {
+        rev_avg = add(rev_avg, scale(n.dist, n.dest)) as vector;
+        dirs_avg = add(dirs_avg, n.dirs) as vector;
+        pos_avg = add(pos_avg, n.cons) as vector;
+      }
+    );
+
+    pos_avg = pos_avg.map((v) => {
       return v / neighbors.length;
     });
 
-    rev = negate(rev);
+    // Seperation
+    rev_avg = rev_avg.map((v) => v / neighbors.length);
+
+    rev_avg = negate(rev_avg);
     fish_data[id].direction = normalize(
-      add(rev, fish_data[id].direction) as vector
+      add(rev_avg, fish_data[id].direction) as vector
+    );
+
+    // Alignment
+    dirs_avg = dirs_avg.map((v) => v / neighbors.length);
+    fish_data[id].direction = normalize(
+      add(dirs_avg, fish_data[id].direction) as vector
     );
   };
 </script>
@@ -387,7 +405,7 @@
   <WebGl {vs} {fs} {buffer} {render} num={undefined} />
 </div>
 
-<input type="range" min="1" max="50" bind:value={num_fish} id="num_fish" />
+<input type="range" min="1" max="500" bind:value={num_fish} id="num_fish" />
 <label for="num_fish">Number of fish: {num_fish}</label>
 
 <input
@@ -402,9 +420,9 @@
 
 <input
   type="range"
-  min="1"
+  min="0.25"
   max="5"
-  step="0.5"
+  step="0.25"
   bind:value={fish_scale}
   id="fish_scale"
 />
