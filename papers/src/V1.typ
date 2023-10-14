@@ -1,4 +1,4 @@
-#import "@templates/ass:0.0.1": *
+#import "@templates/ass:0.1.1": *
 
 #show: doc => template(
   project: "Verkefni 1",
