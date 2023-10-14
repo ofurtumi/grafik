@@ -29,15 +29,18 @@
   $: ball_speed = speed * 0.01;
   let ball_radius = 0.1;
   let show_arrow = false;
+  let sepertion = 2;
+  let alignment = 0.5;
+  let cohesion = 1;
 
   let ball_direction = new Array(500)
     .fill(null)
-    .map((_) => normalize(start_direction()));
-  let ball_locations = new Array(500).fill(null).map((_) =>
-    start_direction().map((i) => {
-      return i * 4;
-    })
-  );
+    .map((_) =>
+      normalize(vec2(Math.random() * 0.1 - 0.05, Math.random() * 0.1 - 0.05))
+    );
+  let ball_locations = new Array(500).fill(null).map((_) => {
+    return vec2(Math.random() * 2 - 1, Math.random() * 2 - 1);
+  });
   let ball_rotations = new Array(500).fill(null).map((_) => 0);
 
   const vs = `
@@ -140,7 +143,7 @@
   };
 
   const flock = (id: number) => {
-    const current = scale(ball_speed, normalize(ball_locations[id]));
+    const current = ball_locations[id];
     let ids: number[] = [];
     const neighbors = ball_locations
       .slice(0, num_balls)
@@ -162,48 +165,112 @@
 
     if (neighbors.length === 0) return;
 
-    let reverse = vec2(0, 0);
-    let direction = vec2(0, 0);
+    let avg_sep = vec2(0, 0);
+    let avg_dir = vec2(0, 0);
+    let avg_loc = vec2(0, 0);
 
     neighbors.forEach((n: { dist: number; loc: vector; dir: vector }) => {
-      reverse = add(reverse, scale(n.dist, n.loc)) as vector;
-      direction = add(direction, n.dir) as vector;
+      avg_sep = add(avg_sep, scale(n.dist, n.loc)) as vector;
+      avg_dir = add(avg_dir, n.dir) as vector;
+      avg_loc = add(avg_loc, n.loc) as vector;
     });
 
     // seperation
-    reverse.map((v) => {
+    avg_sep.map((v) => {
+      return v / neighbors.length;
+    });
+    avg_sep = negate(avg_sep);
+
+    // alignment
+    avg_dir.map((v) => {
       return v / neighbors.length;
     });
 
-    reverse = negate(reverse);
-    ball_direction[id] = normalize(add(reverse, ball_direction[id]) as vector);
+    // cohesion
+    avg_loc.map((v) => {
+      return v / neighbors.length;
+    });
+    avg_loc = add(avg_loc, negate(current)) as vector;
+    let pos_dist = distance(avg_loc, vec2(0, 0));
+    if (pos_dist > 0) {
+      avg_loc = scale(0.1 / pos_dist, avg_loc) as vector;
+    }
+
+    // combine
+    const flocking_vector = vec2(
+      sepertion * avg_sep[0] + alignment * avg_dir[0] + cohesion * avg_loc[0],
+      sepertion * avg_sep[1] + alignment * avg_dir[1] + cohesion * avg_loc[1]
+    );
+
+    ball_direction[id] = normalize(
+      add(flocking_vector, ball_direction[id]) as vector
+    );
   };
 </script>
 
-<WebGl {vs} {fs} {buffer} {render} num={undefined} />
+<div class="flex">
+  <WebGl {vs} {fs} {buffer} {render} num={undefined} />
+  <div class="flex column">
+    <input
+      id="num_balls"
+      type="range"
+      bind:value={num_balls}
+      min="1"
+      max="500"
+    />
+    <label for="num_balls">Number of balls: {num_balls}</label>
 
-<input id="num_balls" type="range" bind:value={num_balls} min="1" max="500" />
-<label for="num_balls">Number of balls: {num_balls}</label>
+    <input
+      id="ball_speed"
+      type="range"
+      bind:value={speed}
+      min="0"
+      max="5"
+      step="0.1"
+    />
+    <label for="num_balls">Ball speed: {speed}</label>
 
-<input
-  id="ball_speed"
-  type="range"
-  bind:value={speed}
-  min="0.5"
-  max="5"
-  step="0.1"
-/>
-<label for="num_balls">Ball speed: {speed}</label>
+    <input
+      id="ball_radius"
+      type="range"
+      bind:value={ball_radius}
+      min="0.0"
+      max="0.1"
+      step="0.01"
+    />
+    <label for="ball_radius">Ball radius: {ball_radius}</label>
 
-<input
-  id="ball_radius"
-  type="range"
-  bind:value={ball_radius}
-  min="0.1"
-  max="0.3"
-  step="0.05"
-/>
-<label for="ball_radius">Ball radius: {ball_radius}</label>
+    <input
+      id="sepertion"
+      type="range"
+      bind:value={sepertion}
+      min="0"
+      max="5"
+      step="0.25"
+    />
+    <label for="sepertion">Seperation: {sepertion}</label>
 
-<input id="show_arrow" type="checkbox" bind:checked={show_arrow} />
-<label for="show_arrow">Show arrow</label>
+    <input
+      id="alignment"
+      type="range"
+      bind:value={alignment}
+      min="0"
+      max="5"
+      step="0.25"
+    />
+    <label for="alignment">Alignment: {alignment}</label>
+
+    <input
+      id="cohesion"
+      type="range"
+      bind:value={cohesion}
+      min="0"
+      max="5"
+      step="0.25"
+    />
+    <label for="cohesion">Cohesion: {cohesion}</label>
+
+    <input id="show_arrow" type="checkbox" bind:checked={show_arrow} />
+    <label for="show_arrow">Show arrow</label>
+  </div>
+</div>
