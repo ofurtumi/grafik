@@ -271,7 +271,7 @@
 
     fish_data[id].current.map((v, i) => {
       if (v >= border || v <= -border) {
-        fish_data[id].current[i] = -fish_data[id].current[i];
+        fish_data[id].current[i] = fish_data[id].current[i] * -0.9;
       }
     });
 
