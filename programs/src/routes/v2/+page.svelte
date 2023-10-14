@@ -104,8 +104,6 @@
     wag_offset: number;
     speed: number;
     color: vector;
-    rot_x: number;
-    rot_y: number;
   }
 
   const fish_data: fish_pos[] = new Array(500).fill(null).map(() => {
@@ -124,8 +122,6 @@
       tail: 0,
       wag_offset: 10 * Math.random() - 5,
       color: vec3(Math.random(), Math.random(), Math.random()),
-      rot_x: 0,
-      rot_y: 0,
     };
   });
 
