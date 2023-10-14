@@ -1,8 +1,9 @@
 <script lang="ts">
   const alt_names: { [key: string]: string } = {
     v1: "Frogger",
-    v2: "Fiskar 🐟",
+    v2: "Fiskar",
     test: "MV.ts",
+    "boid-test": "2D boids",
   };
   const categories: string[] = ["Verkefni", "Heimadæmi", "Annað"];
 
