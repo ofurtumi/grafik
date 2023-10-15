@@ -34,11 +34,11 @@ export const degrees = (rads: number) => {
 };
 
 /**
-* Calculates the distance between two vectors
-* @param u vector
-* @param v vector
-* @returns `number` that is the distance between `u` and `v`
-*/
+ * Calculates the distance between two vectors
+ * @param u vector
+ * @param v vector
+ * @returns `number` that is the distance between `u` and `v`
+ */
 export const distance = (u: vector, v: vector) => {
   if (u.length != v.length) {
     throw "distance(): vectors are not the same dimension";
@@ -50,7 +50,7 @@ export const distance = (u: vector, v: vector) => {
     sum += Math.pow(u[i] - v[i], 2);
   }
   return Math.sqrt(sum);
-}
+};
 
 //  Vector Constructors
 /**
