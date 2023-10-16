@@ -18,10 +18,11 @@
         .filter((s) => s !== "") // filtera út paths sem eru tómir
         .filter((s) => !s.includes(".json"))
     )
-    .filter((s) => s.length > 0);
+    .filter((s) => s.length > 0)
+    .filter((s) => s.length <= 2);
 
   let tree: TREE = {};
-  links.forEach((link) => {
+  [...new Set(links)].forEach((link) => {
     if (tree[link[0]] === undefined) {
       tree = { ...tree, [link[0]]: [link[1]] };
     } else {
