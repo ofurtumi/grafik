@@ -164,12 +164,16 @@
   };
 </script>
 
+<h1>Sólkerfi</h1>
+<h2>Alveg svakalega mikið út í geim</h2>
 <div
   on:mousedown|preventDefault={mousedown}
   on:mouseup|preventDefault={mouseup}
   on:mousemove|preventDefault={mousemove}
 >
-  <WebGl {vs} {fs} {buffer} {render}  />
+  <WebGl {vs} {fs} {buffer} {render} />
 </div>
+<p>Hægt að auka og minnka hraða með upp og niður örvunum</p>
+<p>Hægt að auka og minnka fjarlægð tunglsins með hliðar örvunum</p>
 
 <svelte:window on:keydown={offset_change} on:keyup={() => (keydown = false)} />

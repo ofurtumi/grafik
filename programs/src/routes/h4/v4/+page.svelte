@@ -155,10 +155,12 @@
   };
 </script>
 
+<h1>ikea stóll</h1>
+<h2>hægt að setjast í hann</h2>
 <div
   on:mousedown|preventDefault={mousedown}
   on:mouseup|preventDefault={mouseup}
   on:mousemove|preventDefault={mousemove}
 >
-  <WebGl {vs} {fs} {buffer} {render}  />
+  <WebGl {vs} {fs} {buffer} {render} />
 </div>
