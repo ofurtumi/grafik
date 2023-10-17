@@ -293,7 +293,7 @@
   on:mousemove|preventDefault={mousemove}
   on:wheel={mousescroll}
 >
-  <WebGl {fs} {vs} {buffer} {render} num={undefined} />
+  <WebGl {fs} {vs} {buffer} {render}  />
 </div>
 
 <p>Notið örvatakkana eða wasd til þess að hreyfa ljósgjafan á xy-planinu</p>

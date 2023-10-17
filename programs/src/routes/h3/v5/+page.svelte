@@ -144,7 +144,7 @@
 </script>
 
 <h1><s>Break</s>out</h1>
-<WebGl {vs} {fs} {buffer} {render} num={undefined} />
+<WebGl {vs} {fs} {buffer} {render}  />
 
 <div class="flex column">
   <input type="range" max="1.0" min="0.0" step="0.1" bind:value={ball_speed} />

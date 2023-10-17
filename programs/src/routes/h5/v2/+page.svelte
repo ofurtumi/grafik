@@ -376,7 +376,7 @@
   on:mousemove|preventDefault={mousemove}
   on:wheel={mousescroll}
 >
-  <WebGl {vs} {fs} {buffer} {render} num={undefined} />
+  <WebGl {vs} {fs} {buffer} {render}  />
 </div>
 
 <input

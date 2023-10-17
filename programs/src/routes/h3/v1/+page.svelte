@@ -56,7 +56,7 @@
 </script>
 
 <h1>Diskó þríhyrningur</h1>
-<WebGl {vs} {fs} {buffer} {render} num={undefined} />
+<WebGl {vs} {fs} {buffer} {render}  />
 
 <div>
   <p>

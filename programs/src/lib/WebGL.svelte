@@ -10,7 +10,6 @@
     prog: WebGLProgram | null | undefined
   ) => void;
   export let render: (gl: WebGLRenderingContext) => void;
-  export let num: number | vector | undefined;
   let gl: WebGLRenderingContext | null;
 
   onMount(() => {
@@ -31,12 +30,8 @@
     gl.useProgram(shaderProgram);
     buffer(gl, shaderProgram);
 
-    if (num === undefined) {
-      render(gl);
-    }
+    render(gl);
   });
-
-  $: num !== undefined && gl !== null && gl !== undefined && render(gl);
 </script>
 
 <canvas bind:this={canvas} id="glcanvas" width="500" height="500" />

@@ -169,7 +169,7 @@
   on:mouseup|preventDefault={mouseup}
   on:mousemove|preventDefault={mousemove}
 >
-  <WebGl {vs} {fs} {buffer} {render} num={undefined} />
+  <WebGl {vs} {fs} {buffer} {render}  />
 </div>
 
 <svelte:window on:keydown={offset_change} on:keyup={() => (keydown = false)} />

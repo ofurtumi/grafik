@@ -209,7 +209,7 @@
 </script>
 
 <div class="flex">
-  <WebGl {vs} {fs} {buffer} {render} num={undefined} />
+  <WebGl {vs} {fs} {buffer} {render}  />
   <div class="flex column">
     <input
       id="num_balls"

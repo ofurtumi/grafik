@@ -236,7 +236,7 @@
   on:mousemove|preventDefault={mousemove}
   on:wheel={mousescroll}
 >
-  <WebGl {vs} {fs} {buffer} {render} num={undefined} />
+  <WebGl {vs} {fs} {buffer} {render}  />
 </div>
 
 <h2>Skilgreinum snúning á útlimum á eftirfarandi hátt:</h2>

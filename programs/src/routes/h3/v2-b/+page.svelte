@@ -74,5 +74,5 @@
 </script>
 
 <h1>Íslenski fáninn</h1>
-<WebGl {vs} {fs} {buffer} {render} num={undefined} />
+<WebGl {vs} {fs} {buffer} {render}  />
 <p>Hnútalitarinn litar hnúta 😎, útfrá staðsetningu þeirra á striganum</p>

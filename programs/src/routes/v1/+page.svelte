@@ -270,7 +270,7 @@
     fs={fShader}
     buffer={bFunc}
     render={rFunc}
-    num={undefined}
+    
   />
 
   <h1>{counter}</h1>

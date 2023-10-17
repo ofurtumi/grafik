@@ -3,6 +3,7 @@
   import { vec2, flatten, type vector } from "$lib/MV";
 
   let points: vector[] = [];
+  let n_wanted = 2;
   let n = 3;
 
   const divideSquare = (middle: vector, radius: number, count: number) => {
@@ -53,7 +54,7 @@
       gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
     }`;
 
-  const bFunc = (
+  const buffer = (
     gl: WebGLRenderingContext,
     prog: WebGLProgram | null | undefined
   ) => {
@@ -70,9 +71,13 @@
     gl.enableVertexAttribArray(vPosition);
   };
 
-  const rFunc = (gl: WebGLRenderingContext) => {
-    points = [];
-    divideSquare(vec2(0, 0), 1 / 3, n);
+  const render = (gl: WebGLRenderingContext) => {
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    if (n_wanted !== n) {
+      n = n_wanted;
+      points = [];
+      divideSquare(vec2(0, 0), 1 / 3, n);
+    }
 
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(points));
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -81,10 +86,10 @@
       gl.drawArrays(gl.TRIANGLE_FAN, i, 4);
     }
 
-    points = [];
+    window.requestAnimationFrame(() => render(gl));
   };
 </script>
 
-<WebGl vs={vShader} fs={fShader} buffer={bFunc} render={rFunc} bind:num={n} />
-<input type="range" min="0" max="6" bind:value={n} class="grid-center" />
+<WebGl vs={vShader} fs={fShader} {buffer} {render} />
+<input type="range" min="0" max="6" bind:value={n_wanted} class="grid-center" />
 <h3 class="grid-center">Dýpt á endurkvæmni: {n + 1}</h3>
