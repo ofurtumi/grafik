@@ -144,7 +144,7 @@
 </script>
 
 <h1><s>Break</s>out</h1>
-<WebGl {vs} {fs} {buffer} {render}  />
+<WebGl {vs} {fs} {buffer} {render} />
 
 <div class="flex column">
   <input type="range" max="1.0" min="0.0" step="0.1" bind:value={ball_speed} />
@@ -159,10 +159,10 @@
   >
   <Matrix
     matrix={vec2(
-      Number(Math.abs(dx.toFixed(6))),
-      Number(Math.abs(dy.toFixed(6)))
+      Number(Math.abs(dx.toFixed(3))),
+      Number(Math.abs(dy.toFixed(3)))
     )}
-    dimension={4}
+    dimension={2}
   />
 </div>
 
