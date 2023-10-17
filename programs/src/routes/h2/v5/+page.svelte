@@ -90,6 +90,7 @@
   };
 </script>
 
+<h1>Endurkvæmt sierpenski-teppi</h1>
 <WebGl vs={vShader} fs={fShader} {buffer} {render} />
 <input type="range" min="0" max="6" bind:value={n_wanted} class="grid-center" />
 <h3 class="grid-center">Dýpt á endurkvæmni: {n + 1}</h3>
