@@ -266,21 +266,27 @@
 
     switch (e.key) {
       case "ArrowLeft":
+      case "a":
         lightPosition[0] -= 0.1;
         break;
       case "ArrowRight":
+      case "d":
         lightPosition[0] += 0.1;
         break;
       case "ArrowDown":
+      case "s":
         lightPosition[1] -= 0.1;
         break;
       case "ArrowUp":
+      case "w":
         lightPosition[1] += 0.1;
         break;
     }
   };
 </script>
 
+<h1>Tepotturinn frægi</h1>
+<h2>(og lýsing)</h2>
 <div
   on:mousedown|preventDefault={mousedown}
   on:mouseup|preventDefault={mouseup}
@@ -289,5 +295,7 @@
 >
   <WebGl {fs} {vs} {buffer} {render} num={undefined} />
 </div>
+
+<p>Notið örvatakkana eða wasd til þess að hreyfa ljósgjafan á xy-planinu</p>
 
 <svelte:window on:keydown={keydown} />
