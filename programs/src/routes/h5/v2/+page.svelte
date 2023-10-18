@@ -20,17 +20,18 @@
     scalem,
     rotateZ,
     radians,
-    negate,
-    cross,
   } from "$lib/MV";
 
   // controls
   let movement = false; // Do we rotate?
   let origin_x: number;
+  let player_dir = 0;
+  let player_pos = vec3(0, 0, 0);
+  let speed = 0.1;
 
   const mousedown = (e: MouseEvent) => {
     movement = true;
-    origin_x = e.offsetX;
+    origin_x = e.clientX;
   };
 
   const mouseup = () => {
@@ -39,61 +40,54 @@
 
   const mousemove = (e: MouseEvent) => {
     if (movement) {
-      player_dir = (player_dir - (origin_x - e.offsetX)) % 360;
-      if (Math.abs(player_dir) > 90) {
-        player_dir = 90 * Math.sign(player_dir);
-      }
+      player_dir += 0.4 * (origin_x - e.clientX);
+      player_dir %= 360.0;
+      origin_x = e.clientX;
     }
   };
 
-  const speed = 0.25;
-  const mouseLook = (key: string, mdelta: number) => {
-    const target = add(player_eye, vec3(Math.sin(mdelta), 0, -1)) as vector;
-    const t_cross = cross(
-      add(target, negate(player_eye)) as vector,
-      vec3(0, 1, 0)
+  const look = (p_dir: number) => {
+    const player_x_dir = Math.cos(radians(p_dir));
+    const player_y_dir = Math.sin(radians(p_dir));
+
+    const [x, _, z] = player_pos;
+    return lookAt(
+      vec3(x, 0.5, z),
+      vec3(x + player_x_dir, 0.5, z + player_y_dir),
+      vec3(0.0, 1.0, 0.0)
     );
-    switch (key) {
+  };
+
+  const keydown = (e: KeyboardEvent) => {
+    const p_x_dir = Math.cos(radians(player_dir));
+    const p_z_dir = Math.sin(radians(player_dir));
+
+    switch (e.key) {
       case "w":
-        player_eye = add(
-          player_eye,
-          scale(speed, normalize(add(target, negate(player_eye)) as vector))
+        player_pos = add(
+          player_pos,
+          vec3(p_x_dir * speed, 0, p_z_dir * speed)
         ) as vector;
         break;
       case "s":
-        player_eye = add(
-          player_eye,
-          scale(-speed, normalize(add(target, negate(player_eye)) as vector))
+        player_pos = add(
+          player_pos,
+          vec3(p_x_dir * -speed, 0, p_z_dir * -speed)
         ) as vector;
         break;
       case "a":
-        player_eye = add(
-          player_eye,
-          scale(-speed, normalize(t_cross) as vector)
+        player_pos = add(
+          player_pos,
+          vec3(p_z_dir * speed, 0, -p_x_dir * speed)
         ) as vector;
         break;
       case "d":
-        player_eye = add(
-          player_eye,
-          scale(speed, normalize(t_cross) as vector)
+        player_pos = add(
+          player_pos,
+          vec3(-p_z_dir * speed, 0, p_x_dir * speed)
         ) as vector;
         break;
     }
-
-    let mv = lookAt(player_eye, target, vec3(0, 1, 0));
-    return mv;
-  };
-
-  let player_eye = vec3(0, 0, 1);
-  let player_dir = 0;
-  let player_look = lookAt(
-    player_eye,
-    add(player_eye, vec3(0, 0, -1)) as vector,
-    vec3(0, 1, 0)
-  );
-
-  const keydown = (e: KeyboardEvent) => {
-    player_look = mouseLook(e.key, player_dir) as matrix;
   };
 
   const mousescroll = (e: WheelEvent) => {
@@ -274,7 +268,7 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
     gl.vertexAttribPointer(vertex_pos, 4, gl.FLOAT, false, 0, 0);
 
-    let mv = mouseLook("", radians(player_dir));
+    let mv = look(player_dir);
 
     for (let id = 0; id < num_fish; id++) {
       draw_fish(id, gl, mv, move_fish);
@@ -376,16 +370,17 @@
   on:mousemove|preventDefault={mousemove}
   on:wheel={mousescroll}
 >
-  <WebGl {vs} {fs} {buffer} {render}  />
+  <WebGl {vs} {fs} {buffer} {render} />
 </div>
 
 <input
   id="player_dir"
   type="range"
-  min="-90"
-  max="90"
-  bind:value={player_dir}
+  min="0.1"
+  max="2.0"
+  step="0.1"
+  bind:value={speed}
 />
-<label for="player_dir">Direction: {player_dir}</label>
+<label for="player_dir">Speed: {speed}</label>
 
 <svelte:window on:keydown={keydown} />
