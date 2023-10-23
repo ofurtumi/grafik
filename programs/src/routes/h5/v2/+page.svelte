@@ -52,8 +52,8 @@
 
     const [x, _, z] = player_pos;
     return lookAt(
-      vec3(x, 0.5, z),
-      vec3(x + player_x_dir, 0.5, z + player_y_dir),
+      vec3(x, 0, z),
+      vec3(x + player_x_dir, 0, z + player_y_dir),
       vec3(0.0, 1.0, 0.0)
     );
   };
