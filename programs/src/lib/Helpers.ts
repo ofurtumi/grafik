@@ -46,7 +46,7 @@ const rect_from_coords = (
   x: number,
   y: number,
   size_x = 0.5,
-  size_y = size_x
+  size_y = size_x,
 ) => {
   let points = [
     ...vec2(x - size_x, y + size_y),
@@ -125,6 +125,68 @@ const quad = (r: number, a: number, b: number, c: number, d: number) => {
   return [points, colors];
 };
 
+const normalCube = (r = 0.5) => {
+  let points: matrix = [];
+  let normals: matrix = [];
+
+  const indices = [
+    [1, 0, 3, 2],
+    [2, 3, 7, 6],
+    [3, 0, 4, 7],
+    [6, 5, 1, 2],
+    [4, 5, 6, 7],
+    [5, 4, 0, 1],
+  ];
+
+  indices.forEach(([a, b, c, d], i) => {
+    const [tp, tn] = normQuad(r, a, b, c, d, i);
+    points.push(...tp);
+    normals.push(...tn);
+  });
+
+  return [points, normals];
+};
+
+const normQuad = (
+  r: number,
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  n: number,
+) => {
+  const vertices = [
+    vec4(-r, -r, r, 1.0),
+    vec4(-r, r, r, 1.0),
+    vec4(r, r, r, 1.0),
+    vec4(r, -r, r, 1.0),
+    vec4(-r, -r, -r, 1.0),
+    vec4(-r, r, -r, 1.0),
+    vec4(r, r, -r, 1.0),
+    vec4(r, -r, -r, 1.0),
+  ];
+
+  const faceNormals = [
+    vec4(0.0, 0.0, 1.0, 0.0), // front
+    vec4(1.0, 0.0, 0.0, 0.0), // right
+    vec4(0.0, -1.0, 0.0, 0.0), // down
+    vec4(0.0, 1.0, 0.0, 0.0), // up
+    vec4(0.0, 0.0, -1.0, 0.0), // back
+    vec4(-1.0, 0.0, 0.0, 0.0), // left
+  ];
+
+  let indices = [a, b, c, a, c, d];
+
+  let points = [];
+  let normals = [];
+  for (var i = 0; i < indices.length; ++i) {
+    points.push(vertices[indices[i]]);
+    normals.push(faceNormals[n]);
+  }
+
+  return [points, normals];
+};
+
 export {
   random_rgba,
   rand_between,
@@ -133,4 +195,5 @@ export {
   rect,
   sleep,
   colorCube,
+  normalCube,
 };
