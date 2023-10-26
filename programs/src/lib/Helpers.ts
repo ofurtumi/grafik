@@ -13,6 +13,22 @@ const rand_between = (min: number, max: number) => {
 // einfalt sleep fall, notar promises, fengið héðan: https://stackoverflow.com/a/39914235
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+export const createLoadObserver = (handler: () => void) => {
+  let waiting = 0;
+
+  const onload = (el: Element) => {
+    waiting++;
+    el.addEventListener("load", () => {
+      waiting--;
+      if (waiting === 0) {
+        handler();
+      }
+    });
+  };
+
+  return onload;
+};
+
 // Skilar hnitum fyrir þríhyrning með miðju í (x, y) og stærð size
 const tri_from_coords = (x: number, y: number, size = 0.5, dir = 1) => {
   let points: vector[] = [];

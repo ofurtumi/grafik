@@ -10,11 +10,17 @@
     vec3,
     vec4,
     type matrix,
-    rotateX,
     rotateY,
     scalem,
   } from "$lib/MV";
   import WebGl from "$lib/WebGL.svelte";
+  import { createLoadObserver } from "$lib/Helpers";
+
+  let ready = false;
+  const onload = createLoadObserver(() => {
+    ready = true;
+    console.log("loaded!!!");
+  });
 
   // controls
   let userIncr = 0.1;
@@ -53,38 +59,16 @@
 
   const keydown = (e: KeyboardEvent) => {
     let [xNew, zNew] = [0, 0];
-    switch (e.key) {
-      case "w":
-        forward = true;
-        break;
-      case "s":
-        backward = true;
-        break;
-      case "a":
-        left = true;
-        break;
-      case "d":
-        right = true;
-        break;
-      case " ":
-        up = true;
-        break;
-      case "Shift":
-        down = true;
-        break;
-      case "ArrowDown":
-        lookdown = true;
-        break;
-      case "ArrowUp":
-        lookup = true;
-        break;
-      case "ArrowLeft":
-        rotate = -2;
-        break;
-      case "ArrowRight":
-        rotate = 2;
-        break;
-    }
+    if (e.key === "w") forward = true;
+    else if (e.key === "s") backward = true;
+    else if (e.key === "a") left = true;
+    else if (e.key === "d") right = true;
+    else if (e.key === " ") up = true;
+    else if (e.key === "Shift") down = true;
+    else if (e.key === "ArrowDown") lookdown = true;
+    else if (e.key === "ArrowUp") lookup = true;
+    else if (e.key === "ArrowLeft") rotate = -2;
+    else if (e.key === "ArrowRight") rotate = 2;
   };
 
   const move = () => {
@@ -397,28 +381,35 @@
 
 <h1>Ótrúlegi tumakassinn</h1>
 
-<WebGl {vs} {fs} {buffer} {render} />
+{#if !ready}
+  <p>Sæki myndir...</p>
+{:else}
+  <WebGl {vs} {fs} {buffer} {render} />
+{/if}
 
 <input type="checkbox" id="oob" bind:checked={oob} />
 <label for="oob">Slökkva á collision: {oob ? "já" : "nei"}</label>
 
 <img
   bind:this={wallImage}
+  use:onload
   src="/brick29.jpg"
-  hidden
   alt="Brick wall texture, hidden from the dom"
+  hidden
 />
 <img
   bind:this={floorImage}
+  use:onload
   src="/WoodPlanks.jpg"
-  hidden
   alt="Floor texture, hidden from the dom"
+  hidden
 />
 <img
   bind:this={ceilImage}
+  use:onload
   src="/tumi.jpg"
-  hidden
   alt="Floor texture, hidden from the dom"
+  hidden
 />
 
 <p>wasd til að hreyfa myndavélina</p>
