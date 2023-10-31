@@ -634,11 +634,6 @@ graceful-fs@^4.1.3:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.11.tgz#4183e4e8bf08bb6e05bbb2f7d2e0c8f712ca40e3"
   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
 
-highlight.js@11.8.0:
-  version "11.8.0"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-11.8.0.tgz#966518ea83257bae2e7c9a48596231856555bb65"
-  integrity sha512-MedQhoqVdr0U6SSnWPzfiadUcDHfN/Wzq25AkXiQv9oiOO/sG0S7XkvpFIqWBl9Yq1UYyYOOVORs5UW2XlPyzg==
-
 import-fresh@^3.2.1:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/import-fresh/-/import-fresh-3.3.0.tgz#37162c25fcb9ebaa2e6e53d5b4d88ce17d9e0c2b"
@@ -959,13 +954,6 @@ svelte-confetti@^1.3.0:
   resolved "https://registry.yarnpkg.com/svelte-confetti/-/svelte-confetti-1.3.0.tgz#c9b1d4e2e72eba5f58324be9f4e1d59870823c49"
   integrity sha512-Ip1ch72ge/wopwZ5KDnJCEg4AtLfUYdURDrlxV4MiGKFduRZvyuXq1vl1KKTNr84dBhZxSZ8h0Sl4Sdtmdmtiw==
 
-svelte-highlight@^7.3.0:
-  version "7.3.0"
-  resolved "https://registry.yarnpkg.com/svelte-highlight/-/svelte-highlight-7.3.0.tgz#19de767583abc29eef783fde1c1460af65857acb"
-  integrity sha512-59oE9/xOFXAdT97qXIt6HMlzL2f+0YNQ+BArzRONwCW96ElxX7TGme1kU5s3tsk1D88G5dhBixcP1chOGOkVsg==
-  dependencies:
-    highlight.js "11.8.0"
-
 svelte-hmr@^0.15.3:
   version "0.15.3"
   resolved "https://registry.yarnpkg.com/svelte-hmr/-/svelte-hmr-0.15.3.tgz#df54ccde9be3f091bf5f18fc4ef7b8eb6405fbe6"
@@ -1000,6 +988,11 @@ svelte@^4.0.5:
     locate-character "^3.0.0"
     magic-string "^0.30.0"
     periscopic "^3.1.0"
+
+three@^0.158.0:
+  version "0.158.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.158.0.tgz#03ddd5b60ce9c31be8fb69f27a6d9efd49908ac3"
+  integrity sha512-TALj4EOpdDPF1henk2Q+s17K61uEAAWQ7TJB68nr7FKxqwyDr3msOt5IWdbGm4TaWKjrtWS8DJJWe9JnvsWOhQ==
 
 to-regex-range@^5.0.1:
   version "5.0.1"
