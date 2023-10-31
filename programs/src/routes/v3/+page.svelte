@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import * as THREE from "three";
+  import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 
   let container: HTMLDivElement;
 
@@ -25,6 +26,38 @@
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load("/flip-tumi.jpg");
 
+    const loader = new OBJLoader();
+
+    // load a resource
+    loader.load(
+      // resource URL
+      "/avatar.obj",
+      // called when resource is loaded
+      function (object) {
+        object.traverse((child)=>{
+          if (child instanceof THREE.Mesh) {
+            child.material = new THREE.MeshStandardMaterial({
+            color: 0xFFF32F
+        })
+            console.log("hæ");
+          }
+        })
+
+        object.scale.set(0.01, 0.01, 0.01); // Scale by 0.1 in all directions
+
+        object.position.y = -1;
+        scene.add(object);
+      },
+      // called when loading is in progresses
+      function (xhr) {
+        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      },
+      // called when loading has errors
+      function (error) {
+        console.log("An error happened");
+      }
+    );
+
     for (let i = 0; i < 6; ++i) {
       const cube = new THREE.Mesh(
         new THREE.BoxGeometry(1, 1.5, 1),
@@ -39,7 +72,7 @@
       cubes.push(cube);
     }
 
-    const lightsource = new THREE.PointLight(0xff00ff, 2);
+    const lightsource = new THREE.AmbientLight(0xff00ff, 2);
     scene.add(lightsource);
     const light = new THREE.Mesh(
       new THREE.SphereGeometry(0.5),
@@ -47,6 +80,11 @@
         emissive: 0xff00ff,
       })
     );
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(5, 5, 5).normalize();
+  scene.add(directionalLight);
+
     scene.add(light);
 
     camera.position.z = 2;
