@@ -5,15 +5,6 @@
 
   let container: HTMLDivElement;
 
-  let movement = {
-    left: false,
-    right: false,
-    forward: false,
-    back: false,
-    up: false,
-    down: false,
-  };
-
   const createScene = () => {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
@@ -22,6 +13,8 @@
       0.1,
       1000
     );
+    camera.position.set(0,2,10)
+
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(container.offsetWidth, container.offsetHeight);
     container.appendChild(renderer.domElement);
@@ -29,74 +22,73 @@
     let sigga: THREE.Group<THREE.Object3DEventMap>;
     Sigga({
       func: (obj) => {
-        obj.scale.set(0.05, 0.05, 0.05);
+        obj.scale.set(0.005, 0.005, 0.005);
         obj.position.set(0, -1, -1);
         sigga = obj;
         scene.add(obj);
       },
     });
 
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    const sphereGeometry = new THREE.SphereGeometry(0.4, 32, 32);
+    const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0x32ff00 });
+    let spheres: THREE.Mesh[] = [];
 
-    const light = new THREE.PointLight(0x444444, 10);
+    const numSpheres = 10;
+    for (let i = 0; i < numSpheres; i++) {
+      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      // sphere.scale.set(0.5, 0.5, 0.5);
+      sphere.position.set(-7.5, 10, 0);
+      scene.add(sphere);
+      spheres.push(sphere);
+    }
+
+    const light = new THREE.AmbientLight(0x444444, 10);
     light.position.set(0, 2, 2);
-    const light_helper = new THREE.PointLightHelper(light);
     scene.add(light);
-    scene.add(light_helper);
+
+    const speed = 0.05;
+    console.log(spheres);
+    let head_multiplier = 1;
+    let down_movement = 0;
+    let travel = 0;
 
     function animate() {
-      if (movement.left) {
-        camera.position.x -= 0.1;
+      if (travel >= 15) {
+        head_multiplier *= -1;
+        down_movement += -1;
+        travel = 0;
       }
-      if (movement.right) {
-        camera.position.x += 0.1;
+      if (spheres.at(-1) === undefined) return
+      if (down_movement !== 0) {
+          spheres.at(-1).position.y += down_movement;
+          down_movement = 0;
+      } else {
+        spheres.at(-1).position.x += head_multiplier * speed;
+        travel += speed;
       }
-      if (movement.forward) {
-        camera.position.z -= 0.1;
-      }
-      if (movement.back) {
-        camera.position.z += 0.1;
-      }
-      if (movement.up) {
-        camera.position.y += 0.1;
-      }
-      if (movement.down) {
-        camera.position.y -= 0.1;
+
+      for (let i = spheres.length - 2; i >= 0; i--) {
+        const currentSphere = spheres[i];
+        const targetSphere = spheres[i + 1];
+
+        const dx = targetSphere.position.x - currentSphere.position.x;
+        const dy = targetSphere.position.y - currentSphere.position.y;
+
+        currentSphere.position.x += dx * speed;
+        currentSphere.position.y += dy * speed;
       }
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
+
     animate();
   };
 
   onMount(createScene);
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key.toLowerCase() === "a") movement.left = true;
-    if (e.key.toLowerCase() === "d") movement.right = true;
-    if (e.key.toLowerCase() === "w") movement.forward = true;
-    if (e.key.toLowerCase() === "s") movement.back = true;
-    if (e.key.toLowerCase() === " ") movement.up = true;
-    if (e.key === "Shift") movement.down = true;
-  };
-
-  const handleKeyUp = (e: KeyboardEvent) => {
-    if (e.key.toLowerCase() === "a") movement.left = false;
-    if (e.key.toLowerCase() === "d") movement.right = false;
-    if (e.key.toLowerCase() === "w") movement.forward = false;
-    if (e.key.toLowerCase() === "s") movement.back = false;
-    if (e.key.toLowerCase() === " ") movement.up = false;
-    if (e.key === "Shift") movement.down = false;
-  };
 </script>
 
 <div id="container" bind:this={container} />
-
-<svelte:window on:keydown={handleKeyDown} on:keyup={handleKeyUp} />
 
 <style>
   #container {
