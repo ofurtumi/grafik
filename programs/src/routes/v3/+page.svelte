@@ -1,75 +1,78 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import * as THREE from "three";
-  import { Sigga } from "./sigga";
+  import { Mushrooms } from "./Mushrooms";
 
   let container: HTMLDivElement;
+  let size: number;
 
   const createScene = () => {
+    size = Math.min(container.offsetWidth, container.offsetHeight);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      container.offsetWidth / container.offsetHeight,
-      0.1,
-      1000
-    );
-    camera.position.set(0,2,10)
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    camera.position.set(0, 0, 15);
 
     const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(container.offsetWidth, container.offsetHeight);
+    renderer.setSize(size, size);
     container.appendChild(renderer.domElement);
 
-    let sigga: THREE.Group<THREE.Object3DEventMap>;
-    Sigga({
-      func: (obj) => {
-        obj.scale.set(0.005, 0.005, 0.005);
-        obj.position.set(0, -1, -1);
-        sigga = obj;
-        scene.add(obj);
-      },
-    });
-
+    const centipede_length = 10;
     const sphereGeometry = new THREE.SphereGeometry(0.4, 32, 32);
     const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0x32ff00 });
     let spheres: THREE.Mesh[] = [];
-
-    const numSpheres = 10;
-    for (let i = 0; i < numSpheres; i++) {
+    for (let i = 0; i < centipede_length; i++) {
       const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      // sphere.scale.set(0.5, 0.5, 0.5);
-      sphere.position.set(-7.5, 10, 0);
+      sphere.position.set(-8, 8, 0);
       scene.add(sphere);
       spheres.push(sphere);
     }
+
+    const [game_map, mushrooms] = Mushrooms();
+    mushrooms.forEach((mushroom) => scene.add(mushroom));
 
     const light = new THREE.AmbientLight(0x444444, 10);
     light.position.set(0, 2, 2);
     scene.add(light);
 
-    const speed = 0.05;
-    console.log(spheres);
+    const speed = 0.5;
     let head_multiplier = 1;
-    let down_movement = 0;
+    let wanted_height = 0;
+    let current_height = 0;
+    let current_width = 0;
+    let back_up = false;
     let travel = 0;
 
     function animate() {
       if (travel >= 15) {
-        head_multiplier *= -1;
-        down_movement += -1;
-        travel = 0;
-      }
-      if (spheres.at(-1) === undefined) return
-      if (down_movement !== 0) {
-          spheres.at(-1).position.y += down_movement;
-          down_movement = 0;
-      } else {
-        spheres.at(-1).position.x += head_multiplier * speed;
-        travel += speed;
+        if (current_height <= -15) {
+          back_up = true;
+        } else {
+          travel = 0;
+          head_multiplier *= -1;
+          wanted_height -= 1;
+        }
       }
 
-      for (let i = spheres.length - 2; i >= 0; i--) {
+      if (back_up) {
+        spheres[0].position.y += speed;
+        current_height = (current_height * 10 + speed * 10) / 10;
+        if (current_height === 0) {
+          back_up = false;
+          wanted_height = 0;
+          travel = 0;
+        }
+      } else if (wanted_height !== current_height) {
+        console.log(game_map[Math.abs(current_height)]);
+        spheres[0].position.y -= speed;
+        current_height = (current_height * 10 - speed * 10) / 10;
+      } else {
+        spheres[0].position.x =
+          (spheres[0].position.x * 10 + head_multiplier * speed * 10) / 10;
+        travel += speed;
+      }
+      for (let i = 1; i < centipede_length; i++) {
         const currentSphere = spheres[i];
-        const targetSphere = spheres[i + 1];
+        const targetSphere = spheres[i - 1];
 
         const dx = targetSphere.position.x - currentSphere.position.x;
         const dy = targetSphere.position.y - currentSphere.position.y;
@@ -79,7 +82,7 @@
       }
 
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      requestAnimationFrame(() => setTimeout(animate, 0));
     }
 
     animate();
@@ -92,6 +95,8 @@
 
 <style>
   #container {
+    display: flex;
+    justify-content: center;
     width: 100%;
     height: 100%;
   }
