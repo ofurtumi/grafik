@@ -34,6 +34,7 @@
       wireframe: false,
     });
     const sphereAlfur = new THREE.Mesh(geometryAlfur, material);
+    sphereAlfur.position.set( 7,-17, 0);
     scene.add(sphereAlfur);
 
     const moveDistance = 0.1; // The distance the sphere moves each frame
