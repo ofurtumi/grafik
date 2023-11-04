@@ -28,7 +28,7 @@ export const Mushrooms = () => {
           color: 0x90aabb * (1 + game_map[i][j]),
         });
         const sphere = new Mesh(geometry, material);
-        sphere.position.set(j - 8, 8 - i, 0);
+        sphere.position.set(j, -i, 0);
         spheres.push(sphere);
       }
     }

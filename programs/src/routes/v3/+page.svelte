@@ -10,7 +10,7 @@
     size = Math.min(container.offsetWidth, container.offsetHeight);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    camera.position.set(0, 0, 15);
+    camera.position.set(7.5, -9, 15);
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(size, size);
@@ -22,7 +22,7 @@
     let spheres: THREE.Mesh[] = [];
     for (let i = 0; i < centipede_length; i++) {
       const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      sphere.position.set(-8, 8, 0);
+      sphere.position.set(0, 0, 0);
       scene.add(sphere);
       spheres.push(sphere);
     }
@@ -34,55 +34,64 @@
     light.position.set(0, 2, 2);
     scene.add(light);
 
-    const speed = 0.5;
-    let head_multiplier = 1;
-    let wanted_height = 0;
-    let current_height = 0;
-    let current_width = 0;
-    let back_up = false;
-    let travel = 0;
+    let direction = 1;
+    let going_up = false;
+    let next_up = false;
+    let positions = new Array(10).fill(0).map((_) => {
+      return { x: 0, y: 0 };
+    });
+
+    const outsideBounds = (
+      position: number,
+      direction: number,
+      low: number,
+      high: number
+    ): boolean => {
+      if (direction > 0) return position >= high;
+      else return position <= low;
+    };
+
+    const blocked = (height: number, position: number, direction: number) => {
+      return game_map[height][position + direction] > 1;
+    };
+
+    const move_worm = (speed: number) => {
+      const head = spheres[0].position;
+      if (going_up) {
+        head.y += speed;
+        going_up = head.y !== 0;
+      } else if (head.y <= -15 && next_up) {
+        next_up = false;
+        going_up = true;
+      } else if (
+        outsideBounds(head.x, direction, 0, 15) ||
+        blocked(Math.abs(head.y), head.x, direction)
+      ) {
+        if (head.y === -15) next_up = true;
+        else head.y -= speed;
+        direction *= -1;
+      } else {
+        head.x += speed * direction;
+      }
+
+      for (let i = 0; i < positions.length; ++i) {
+        if (i === 9) positions[i] = { x: head.x, y: head.y };
+        else {
+          let { x, y } = positions[i + 1];
+          positions[i] = { x: x, y: y };
+        }
+      }
+      spheres.slice(1).forEach((s, i) => {
+        let pos = positions[i];
+        s.position.x = pos.x;
+        s.position.y = pos.y;
+      });
+    };
 
     function animate() {
-      if (travel >= 15) {
-        if (current_height <= -15) {
-          back_up = true;
-        } else {
-          travel = 0;
-          head_multiplier *= -1;
-          wanted_height -= 1;
-        }
-      }
-
-      if (back_up) {
-        spheres[0].position.y += speed;
-        current_height = (current_height * 10 + speed * 10) / 10;
-        if (current_height === 0) {
-          back_up = false;
-          wanted_height = 0;
-          travel = 0;
-        }
-      } else if (wanted_height !== current_height) {
-        console.log(game_map[Math.abs(current_height)]);
-        spheres[0].position.y -= speed;
-        current_height = (current_height * 10 - speed * 10) / 10;
-      } else {
-        spheres[0].position.x =
-          (spheres[0].position.x * 10 + head_multiplier * speed * 10) / 10;
-        travel += speed;
-      }
-      for (let i = 1; i < centipede_length; i++) {
-        const currentSphere = spheres[i];
-        const targetSphere = spheres[i - 1];
-
-        const dx = targetSphere.position.x - currentSphere.position.x;
-        const dy = targetSphere.position.y - currentSphere.position.y;
-
-        currentSphere.position.x += dx * speed;
-        currentSphere.position.y += dy * speed;
-      }
-
+      move_worm(1);
       renderer.render(scene, camera);
-      requestAnimationFrame(() => setTimeout(animate, 0));
+      requestAnimationFrame(() => setTimeout(animate, 100));
     }
 
     animate();
