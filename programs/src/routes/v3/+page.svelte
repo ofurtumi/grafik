@@ -13,7 +13,7 @@
     size = Math.min(container.offsetWidth, container.offsetHeight);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    camera.position.set(7.5, -9, 15);
+    camera.position.set(7.5, -10, 15);
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(size, size);
@@ -27,13 +27,13 @@
 
     //Gardalfur
     const player = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 16, 16),
+      new THREE.SphereGeometry(0.4, 16, 16),
       new THREE.MeshBasicMaterial({
         color: 0xff0000,
         wireframe: false,
       })
     );
-    player.position.set(7, -17, 0);
+    player.position.set(7, -map_size[1] - 2, 0);
     scene.add(player);
 
     const c2 = Centipede({
@@ -105,11 +105,15 @@
       });
     };
 
+    let last = Date.now();
     function animate() {
       move_player(player, 0.1);
-      centipedes.forEach((cent) => move_worm(1, cent));
+      if (Date.now() - last > 100) {
+        centipedes.forEach((cent) => move_worm(1, cent));
+        last = Date.now();
+      }
       renderer.render(scene, camera);
-      requestAnimationFrame(() => setTimeout(animate, 0));
+      requestAnimationFrame(animate);
     }
 
     animate();
