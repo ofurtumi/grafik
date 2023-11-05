@@ -13,7 +13,7 @@ export const Mushrooms = (width = 16, height = 16) => {
       });
     }
 
-    if (i < height) {
+    if (i < height - 2) {
       let position = available[Math.floor(Math.random() * available.length)];
       arr[position] = 5;
     }
