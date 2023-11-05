@@ -2,9 +2,11 @@
   import { onMount } from "svelte";
   import * as THREE from "three";
   import { Mushrooms } from "./Mushrooms";
+  import { Centipede, type CENTIPEDE } from "./Centipede";
 
   let container: HTMLDivElement;
   let size: number;
+  let map_size = [16, 17];
 
   const createScene = () => {
     size = Math.min(container.offsetWidth, container.offsetHeight);
@@ -16,30 +18,30 @@
     renderer.setSize(size, size);
     container.appendChild(renderer.domElement);
 
-    const centipede_length = 10;
-    const sphereGeometry = new THREE.SphereGeometry(0.4, 32, 32);
-    const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0x32ff00 });
-    let spheres: THREE.Mesh[] = [];
-    for (let i = 0; i < centipede_length; i++) {
-      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      sphere.position.set(0, 0, 0);
-      scene.add(sphere);
-      spheres.push(sphere);
-    }
+    const c1 = Centipede({
+      direction: 1,
+      length: 10,
+      head: new THREE.Vector3(0, 0, 0),
+    });
 
-    const [game_map, mushrooms] = Mushrooms();
+    const c2 = Centipede({
+      direction: -1,
+      length: 5,
+      head: new THREE.Vector3(map_size[0] - 1, 0, 0),
+    });
+
+    const centipedes = [c1, c2];
+
+    centipedes.forEach((cent) => {
+      cent.spheres.forEach((sphere) => scene.add(sphere));
+    });
+
+    const [game_map, mushrooms] = Mushrooms(map_size[0], map_size[1]);
     mushrooms.forEach((mushroom) => scene.add(mushroom));
 
     const light = new THREE.AmbientLight(0x444444, 10);
     light.position.set(0, 2, 2);
     scene.add(light);
-
-    let direction = 1;
-    let going_up = false;
-    let next_up = false;
-    let positions = new Array(10).fill(0).map((_) => {
-      return { x: 0, y: 0 };
-    });
 
     const outsideBounds = (
       position: number,
@@ -55,41 +57,44 @@
       return game_map[height][position + direction] > 1;
     };
 
-    const move_worm = (speed: number) => {
-      const head = spheres[0].position;
-      if (going_up) {
-        head.y += speed;
-        going_up = head.y !== 0;
-      } else if (head.y <= -15 && next_up) {
-        next_up = false;
-        going_up = true;
+    const move_worm = (speed: number, cent: CENTIPEDE) => {
+      if (!cent.tail) return;
+      let prev_head = new THREE.Vector3(...cent.head);
+      let prev = [prev_head, ...cent.tail.slice(0, cent.tail.length - 1)];
+
+      if (cent.going_up) {
+        cent.head.y += speed;
+        cent.going_up = cent.head.y !== 0;
+      } else if (cent.head.y <= -(map_size[1] - 1) && cent.next_up) {
+        cent.next_up = false;
+        cent.going_up = true;
       } else if (
-        outsideBounds(head.x, direction, 0, 15) ||
-        blocked(Math.abs(head.y), head.x, direction)
+        outsideBounds(cent.head.x, cent.direction, 0, map_size[0] - 1) ||
+        blocked(Math.abs(cent.head.y), cent.head.x, cent.direction)
       ) {
-        if (head.y === -15) next_up = true;
-        else head.y -= speed;
-        direction *= -1;
+        if (cent.head.y === -(map_size[1] - 1)) cent.next_up = true;
+        else cent.head.y -= speed;
+        cent.direction *= -1;
       } else {
-        head.x += speed * direction;
+        cent.head.x += speed * cent.direction;
       }
 
-      for (let i = 0; i < positions.length; ++i) {
-        if (i === 9) positions[i] = { x: head.x, y: head.y };
-        else {
-          let { x, y } = positions[i + 1];
-          positions[i] = { x: x, y: y };
-        }
+      for (let i = 0; i < prev.length; ++i) {
+        cent.tail[i] = prev[i];
       }
-      spheres.slice(1).forEach((s, i) => {
-        let pos = positions[i];
+
+      if (!cent.spheres) return;
+      cent.spheres.forEach((s, i) => {
+        let pos: THREE.Vector3;
+        if (i === 0) pos = cent.head;
+        else pos = cent?.tail?.[i - 1] ?? new THREE.Vector3(0, 0, 0);
         s.position.x = pos.x;
         s.position.y = pos.y;
       });
     };
 
     function animate() {
-      move_worm(1);
+      centipedes.forEach((cent) => move_worm(1, cent));
       renderer.render(scene, camera);
       requestAnimationFrame(() => setTimeout(animate, 100));
     }
