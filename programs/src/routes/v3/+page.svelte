@@ -8,30 +8,37 @@
   let container: HTMLDivElement;
   let size: number;
   let map_size = [16, 17];
-  const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
   let follow_player = false;
   let player_pos = new THREE.Vector3(0, 0, 0);
-  camera.position.set(7.5, -10, 15);
+  let last = Date.now();
+
+  const initScene = (container: HTMLDivElement) => {
+    // Setting up scene
+    size = Math.min(container.offsetWidth, container.offsetHeight);
+    const scene = new THREE.Scene();
+
+    // Next the camera
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    camera.position.set(7.5, -10, 15);
+
+    // Finally the renderer
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(size, size);
+    container.appendChild(renderer.domElement);
+
+    return { scene, camera, renderer };
+  };
 
   const swap_camera = () => {
     if (follow_player) {
       follow_player = false;
-      camera.position.set(7.5, -10, 15);
-      camera.rotation.x = 0;
     } else {
-      camera.position.set(player_pos.x, player_pos.y - 2, 1);
-      camera.rotation.x = Math.PI / 2;
       follow_player = true;
     }
   };
 
   const createScene = () => {
-    size = Math.min(container.offsetWidth, container.offsetHeight);
-    const scene = new THREE.Scene();
-
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(size, size);
-    container.appendChild(renderer.domElement);
+    const { scene, camera, renderer } = initScene(container);
 
     const c1 = Centipede({
       direction: 1,
@@ -119,12 +126,13 @@
       });
     };
 
-    let last = Date.now();
     function animate() {
       player_pos = move_player(player, 0.1);
       if (follow_player) {
         camera.position.x = player_pos.x;
         camera.position.y = player_pos.y - 1;
+        camera.position.z = 1;
+        camera.rotation.x = Math.PI / 2;
       }
       if (Date.now() - last > 100) {
         centipedes.forEach((cent) => move_worm(1, cent));
@@ -140,11 +148,10 @@
   onMount(createScene);
 </script>
 
+<button on:click={swap_camera}>Skipta um sjónahorn</button>
 <div id="container" bind:this={container} />
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
-
-<button on:click={swap_camera}>Skipta um sjónahorn</button>
 
 <style>
   #container {
