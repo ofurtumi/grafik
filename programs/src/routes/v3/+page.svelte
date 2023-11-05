@@ -8,12 +8,26 @@
   let container: HTMLDivElement;
   let size: number;
   let map_size = [16, 17];
+  const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+  let follow_player = false;
+  let player_pos = new THREE.Vector3(0, 0, 0);
+  camera.position.set(7.5, -10, 15);
+
+  const swap_camera = () => {
+    if (follow_player) {
+      follow_player = false;
+      camera.position.set(7.5, -10, 15);
+      camera.rotation.x = 0;
+    } else {
+      camera.position.set(player_pos.x, player_pos.y - 2, 1);
+      camera.rotation.x = Math.PI / 2;
+      follow_player = true;
+    }
+  };
 
   const createScene = () => {
     size = Math.min(container.offsetWidth, container.offsetHeight);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    camera.position.set(7.5, -10, 15);
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(size, size);
@@ -52,7 +66,7 @@
     mushrooms.forEach((mushroom) => scene.add(mushroom));
 
     const light = new THREE.AmbientLight(0x444444, 10);
-    light.position.set(0, 2, 2);
+    light.position.set(0, 0, 0);
     scene.add(light);
 
     const outsideBounds = (
@@ -107,7 +121,11 @@
 
     let last = Date.now();
     function animate() {
-      move_player(player, 0.1);
+      player_pos = move_player(player, 0.1);
+      if (follow_player) {
+        camera.position.x = player_pos.x;
+        camera.position.y = player_pos.y - 1;
+      }
       if (Date.now() - last > 100) {
         centipedes.forEach((cent) => move_worm(1, cent));
         last = Date.now();
@@ -125,6 +143,8 @@
 <div id="container" bind:this={container} />
 
 <svelte:window on:keydown={keydown} on:keyup={keyup} />
+
+<button on:click={swap_camera}>Skipta um sjónahorn</button>
 
 <style>
   #container {

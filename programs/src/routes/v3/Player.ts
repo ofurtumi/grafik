@@ -33,4 +33,5 @@ export const move_player = (obj: Mesh, speed = moveDistance) => {
 
   obj.position.x += x_move;
   obj.position.y += y_move;
+  return obj.position;
 };
