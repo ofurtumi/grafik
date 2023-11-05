@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import * as THREE from "three";
   import { Mushrooms } from "./Mushrooms";
+  import { move_player, keyup, keydown } from "./Player";
 
   let container: HTMLDivElement;
   let size: number;
@@ -28,29 +29,15 @@
     }
 
     //Gardalfur
-    const geometryAlfur = new THREE.SphereGeometry(1, 32, 32); //
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xff0000,
-      wireframe: false,
-    });
-    const sphereAlfur = new THREE.Mesh(geometryAlfur, material);
-    sphereAlfur.position.set( 7,-17, 0);
-    scene.add(sphereAlfur);
-
-    const moveDistance = 0.1; // The distance the sphere moves each frame
-    const keyState = {}; // Object to hold the state of arrow keys
-
-    function keyDownHandler(event) {
-      keyState[event.code] = true;
-    }
-
-    function keyUpHandler(event) {
-      keyState[event.code] = false;
-    }
-
-    // Add event listeners
-    window.addEventListener("keydown", keyDownHandler);
-    window.addEventListener("keyup", keyUpHandler);
+    const player = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 16, 16),
+      new THREE.MeshBasicMaterial({
+        color: 0xff0000,
+        wireframe: false,
+      })
+    );
+    player.position.set(7, -17, 0);
+    scene.add(player);
 
     const [game_map, mushrooms] = Mushrooms();
     mushrooms.forEach((mushroom) => scene.add(mushroom));
@@ -116,22 +103,10 @@
     function animate() {
       move_worm(1);
 
-      // Hreyfa Álf
-      if (keyState["ArrowUp"]) {
-        sphereAlfur.position.y += moveDistance;
-      }
-      if (keyState["ArrowDown"]) {
-        sphereAlfur.position.y -= moveDistance;
-      }
-      if (keyState["ArrowLeft"]) {
-        sphereAlfur.position.x -= moveDistance;
-      }
-      if (keyState["ArrowRight"]) {
-        sphereAlfur.position.x += moveDistance;
-      }
+      move_player(player, 0.1);
 
       renderer.render(scene, camera);
-      requestAnimationFrame(() => setTimeout(animate, 100));
+      requestAnimationFrame(() => setTimeout(animate, 0));
     }
 
     animate();
@@ -141,6 +116,8 @@
 </script>
 
 <div id="container" bind:this={container} />
+
+<svelte:window on:keydown={keydown} on:keyup={keyup} />
 
 <style>
   #container {
