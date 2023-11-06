@@ -27,6 +27,14 @@ export const Centipede = ({
     return new Mesh(sphereGeometry, sphereMaterial);
   });
 
+  if (spheres.length > 0 && head) {
+    spheres[0].position.set(...head);
+    console.log(tail);
+    for (let i = 0; i < length - 2; i++) {
+      spheres[i + 1].position.set(...tail[i]);
+    }
+  }
+
   return {
     direction,
     going_up,

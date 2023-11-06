@@ -31,16 +31,16 @@ export const move_player = (
   let y_move = 0;
 
   if (keyState["ArrowUp"]) {
-    y_move += speed;
+    y_move = (y_move * 10 + speed * 10) / 10;
   }
   if (keyState["ArrowDown"]) {
-    y_move -= speed;
+    y_move = (y_move * 10 - speed * 10) / 10;
   }
   if (keyState["ArrowLeft"]) {
-    x_move -= speed;
+    x_move = (x_move * 10 - speed * 10) / 10;
   }
   if (keyState["ArrowRight"]) {
-    x_move += speed;
+    x_move = (x_move * 10 + speed * 10) / 10;
   }
 
   obj.position.x += x_move;

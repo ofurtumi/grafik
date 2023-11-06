@@ -5,15 +5,23 @@
   import { move_player, keyup, keydown } from "./Player";
   import { Centipede, type CENTIPEDE } from "./Centipede";
 
+  interface REMOVE {
+    cent: CENTIPEDE;
+    cent_index: number;
+    index: number;
+  }
   let container: HTMLDivElement;
+  let score = 0;
   let size: number;
   let map_size = [16, 17];
   let follow_player = false;
   let player_pos = new THREE.Vector3(0, 0, 0);
-  let centi_speed = Date.now();
+  let last_centi_move = Date.now();
+  let centi_delay = 150;
   let last_fired = Date.now();
-  const bullet_rate = 100;
+  const bullet_delay = 200;
   const bullet_speed = 0.2;
+  let to_remove: REMOVE | null;
   let camera: THREE.PerspectiveCamera;
 
   const initScene = (container: HTMLDivElement) => {
@@ -55,13 +63,14 @@
   };
 
   let bullets: THREE.Mesh[] = [];
+  let bullets_alive: boolean[] = [];
 
   const fire = (event: KeyboardEvent) => {
-    if (event.key !== " " || Date.now() - last_fired < bullet_rate) return;
+    if (event.key !== " " || Date.now() - last_fired < bullet_delay) return;
     last_fired = Date.now();
     console.log("Firing", bullets.length);
     const bullet = new THREE.Mesh(
-      new THREE.SphereGeometry(0.1, 16, 16),
+      new THREE.BoxGeometry(0.1, 0.1),
       new THREE.MeshBasicMaterial({
         color: 0x00ff00,
       })
@@ -69,26 +78,21 @@
     bullet.position.set(player_pos.x, player_pos.y, player_pos.z);
     bullet.rotation.x = Math.PI / 2;
     bullets.push(bullet);
+    bullets_alive.push(true);
   };
 
   const createScene = () => {
     const { scene, camera, renderer, player } = initScene(container);
 
-    const c1 = Centipede({
-      direction: 1,
-      length: 10,
-      head: new THREE.Vector3(0, 0, 0),
-    });
-
     scene.add(player);
 
-    const c2 = Centipede({
-      direction: -1,
-      length: 5,
-      head: new THREE.Vector3(map_size[0] - 1, 0, 0),
-    });
-
-    const centipedes = [c1, c2];
+    const centipedes = [
+      Centipede({
+        direction: 1,
+        length: 15,
+        head: new THREE.Vector3(0, 0, 0),
+      }),
+    ];
 
     centipedes.forEach((cent) => {
       cent.spheres.forEach((sphere) => scene.add(sphere));
@@ -167,21 +171,113 @@
         camera.position.y = player_pos.y - 1;
       }
 
-      let slicepoint = 0;
       bullets.forEach((bullet, i) => {
+        if (bullet.parent !== scene && bullets_alive[i]) scene.add(bullet);
         bullet.position.y += bullet_speed;
-        scene.add(bullet);
+        // check if bullet collided with scene object
         if (bullet.position.y > 0) {
           scene.remove(bullet);
-          slicepoint = i;
+          bullets_alive[i] = false;
+        } else {
+          const [rx, ry] = [
+            Math.round(bullet.position.x),
+            Math.round(bullet.position.y),
+          ];
+          const ry_abs = Math.abs(ry);
+          if (game_map[ry_abs][rx] > 1) {
+            console.log("hit");
+            bullets_alive[i] = false;
+            scene.remove(bullet);
+            game_map[ry_abs][rx] -= 1;
+            let scale = (mushrooms[ry_abs].scale.x * 10 - 2) / 10;
+            mushrooms[ry_abs].scale.set(scale, scale, scale);
+            if (game_map[ry_abs][rx] === 1) {
+              scene.remove(mushrooms[ry_abs]);
+              score += 1;
+            }
+          } else {
+            centipedes.forEach((cent, u) => {
+              if (
+                cent.spheres.some(
+                  (sphere) =>
+                    sphere.position.x === rx && sphere.position.y === ry
+                )
+              ) {
+                bullets_alive[i] = false;
+                scene.remove(bullet);
+                let cutoff = 0;
+                cent.spheres.forEach((sphere, j) => {
+                  if (sphere.position.x === rx && sphere.position.y === ry) {
+                    cutoff = j;
+                    console.log(cutoff, cent.length);
+                  }
+                });
+                score += 10;
+                to_remove = { cent, cent_index: u, index: cutoff };
+              }
+            });
+          }
         }
       });
 
-      bullets = bullets.slice(slicepoint);
+      if (to_remove) {
+        let { cent, cent_index, index } = to_remove;
+        let tail: THREE.Vector3[] = [];
+        if (cent.tail) {
+          tail = [...cent.tail];
+        }
 
-      if (Date.now() - centi_speed > 100) {
+        if (index === 0 || index === cent.length - 1) {
+          console.log(cent.length, index);
+          if (tail.length > 0) {
+            if (index === 0) cent.head = tail[0];
+            cent.tail?.pop();
+            cent.length -= 1;
+            scene.remove(cent.spheres?.pop() as THREE.Mesh);
+            console.log("Rass eða haus");
+          } else {
+            scene.remove(cent.spheres?.[0] as THREE.Mesh);
+            centipedes.splice(cent_index, 1);
+          }
+        } else {
+          console.log("mid");
+
+          cent.tail = tail.slice(0, index);
+          scene.remove(cent.spheres?.[index] as THREE.Mesh);
+          for (let i = index; i < cent.length; ++i) {
+            scene.remove(cent.spheres?.[i] as THREE.Mesh);
+          }
+
+          cent.spheres = cent.spheres?.slice(0, index);
+          cent.length = index;
+
+          let new_tail = tail.slice(index);
+          let new_head = new_tail.shift() as THREE.Vector3;
+
+          new_tail.reverse();
+
+          let new_cent = Centipede({
+            direction: -cent.direction,
+            length: new_tail.length + 1,
+            head: new_head,
+            tail: new_tail.length ? new_tail : [],
+          });
+
+          new_cent.spheres.forEach((sphere) => scene.add(sphere));
+
+          centipedes.push(new_cent);
+        }
+        to_remove = null;
+      }
+
+      bullets = bullets.filter((_, i) => bullets_alive[i]);
+      bullets_alive = bullets_alive.filter((v) => v);
+
+      if (Date.now() - last_centi_move > centi_delay) {
+        console.log(centipedes.length);
+
         centipedes.forEach((cent) => move_worm(1, cent));
-        centi_speed = Date.now();
+        last_centi_move = Date.now();
       }
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
@@ -194,6 +290,7 @@
 </script>
 
 <button on:click={swap_camera}>Skipta um sjónahorn</button>
+<h1>Stig: {score}</h1>
 <div id="container" bind:this={container} />
 
 <svelte:window
