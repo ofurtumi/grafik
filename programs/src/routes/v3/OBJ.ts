@@ -9,22 +9,38 @@ import {
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 
 /**
- * SiggaProps
- * @param {string} texture - texture path
+ * @param {string} model - relative static directory path to model
+ * @param {string} texture - relatice static directory path to texture
  * @param {number} color - hex color
- * @param {function} func - function to be called with the loaded object
+ * @param {function} func - function to be called when the object has loaded, assign the object to a variable
  */
-interface SiggaProps {
+interface OBJProps {
+  model: string;
   texture?: string;
   color?: number;
   func: (obj: Group<Object3DEventMap>) => void;
 }
 
 /**
- * Sigga
- * Function that loads an avatar model
+ * Function that loads a given OBJ model
+ *
+ * Usage:
+ * <pre>
+ * import { OBJ } from './OBJ';
+ * let new_obj: Group<Object3DEventMap>; // fyrst we define an object
+ *
+ * // then we call function with an arg function that assigns to the defined object
+ * OBJ({
+ *   model: "/avatar.obj",      // required
+ *   texture: "/sigga.png",     // not required
+ *   color: 0xff0000,           // not required
+ *   func: (obj) => {           // required
+ *     obj = new_obj;
+ *   },
+ * });
+ * </pre>
  */
-export const Sigga = ({ texture, color, func }: SiggaProps) => {
+export const OBJ = ({ model, texture, color, func }: OBJProps) => {
   let loaded_texture: Texture;
   if (texture) {
     loaded_texture = new TextureLoader().load(texture);
@@ -32,7 +48,7 @@ export const Sigga = ({ texture, color, func }: SiggaProps) => {
   const loader = new OBJLoader();
 
   loader.load(
-    "/avatar.obj",
+    model,
     (obj) => {
       obj.traverse((child) => {
         if (child instanceof Mesh) {
