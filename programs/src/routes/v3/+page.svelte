@@ -3,20 +3,14 @@
   import * as THREE from "three";
   import { Mushrooms } from "./Mushrooms";
   import { move_player, keyup, keydown, move_bullet, shoot } from "./Player";
-  import {
-    Centipede,
-    type CENTIPEDE,
-    move_centipedes,
-    update_centipedes,
-  } from "./Centipede";
-  import type { GAME, MAP } from "./types";
+  import { Centipede, move_centipedes, update_centipedes } from "./Centipede";
+  import type { GAME } from "./types";
 
   let container: HTMLDivElement;
   let size: number;
-  let map_size = [16, 17];
+  let map_size = [16, 20];
 
   onMount(() => {
-    console.log("test");
     createScene(container);
   });
 
@@ -57,7 +51,6 @@
         new THREE.SphereGeometry(0.4, 16, 16),
         new THREE.MeshBasicMaterial({
           color: 0xff0000,
-          wireframe: true,
         })
       ),
       player_data: {
@@ -69,6 +62,7 @@
           x2: 0,
           y2: 0,
         },
+        dead: 0,
       },
       bullets: [],
       bullet_data: {
@@ -87,7 +81,7 @@
       centipede_data: {
         to_remove: null,
         speed: 1,
-        delay: 150,
+        delay: 50,
         last_move: Date.now(),
       },
       frozen: false,
@@ -102,9 +96,9 @@
     game.player.position.set(7, -game.map.height - 2, 0);
     game.player_data.limits = {
       x1: 0,
-      y1: -(game.map.height + 2),
+      y1: -game.map.height,
       x2: game.map.width - 1,
-      y2: -(game.map.height - 1),
+      y2: -(game.map.height - 2),
     };
 
     const [game_map, mushrooms] = Mushrooms(game.map.width, game.map.height);
@@ -149,19 +143,41 @@
 
       const time_since = Date.now() - game.centipede_data.last_move;
       if (time_since > game.centipede_data.delay && !game.frozen) {
-        game.centipedes.forEach((cent) =>
-          move_centipedes(game.centipede_data.speed, cent, game.map)
-        );
+        game.centipedes.forEach((cent) => move_centipedes(cent, game));
         game.centipede_data.last_move = Date.now();
       }
       game.centipedes.filter((cent) => cent.spheres && cent.spheres.length > 0);
       game.renderer.render(game.scene, game.camera);
+
+      console.log(game.player_data.pos);
+
+      if (game.centipedes.length === 0) {
+        alert("Þú vannst!");
+        window.location.reload();
+      }
+
+      if (game.player_data.dead) {
+        if (game.player_data.dead > 1) {
+          alert("Þú tapaðir!");
+          window.location.reload();
+        }
+        game.player_data.dead++;
+      }
       requestAnimationFrame(animate);
     }
 
     animate();
   };
 </script>
+
+<div>
+  <button on:click={() => swap_camera(game)}>Skipta um sjónarhorn</button>
+  <button on:click={() => (game.frozen = !game.frozen)}>Frysta orm</button>
+</div>
+
+<h1>Centipede</h1>
+<h2>Þorvaldur Tumi Baldursson og Sigríður Birna Matthíasdóttir</h2>
+<h2>Stig: {game?.score}</h2>
 
 <div id="container" bind:this={container} />
 

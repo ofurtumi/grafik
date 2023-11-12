@@ -55,26 +55,28 @@ const blocked = (
   position: number,
   direction: number,
   game_map: number[][],
+  y,
 ) => {
   return game_map[height][position + direction] > 1;
 };
 
-export const move_centipedes = (speed: number, cent: CENTIPEDE, map: MAP) => {
+export const move_centipedes = (cent: CENTIPEDE, game: GAME) => {
   if (!cent.tail) return;
   let prev_head = new Vector3(...cent.head);
   let prev = [prev_head, ...cent.tail.slice(0, cent.tail.length - 1)];
+  const speed = game.centipede_data.speed;
 
   if (cent.going_up) {
     cent.head.y += speed;
     cent.going_up = cent.head.y !== 0;
-  } else if (cent.head.y <= -(map.height - 1) && cent.next_up) {
+  } else if (cent.head.y <= -(game.map.height - 1) && cent.next_up) {
     cent.next_up = false;
     cent.going_up = true;
   } else if (
-    outsideBounds(cent.head.x, cent.direction, 0, map.width - 1) ||
-    blocked(Math.abs(cent.head.y), cent.head.x, cent.direction, map.map)
+    outsideBounds(cent.head.x, cent.direction, 0, game.map.width - 1) ||
+    blocked(Math.abs(cent.head.y), cent.head.x, cent.direction, game.map.map)
   ) {
-    if (cent.head.y === -(map.height - 1)) cent.next_up = true;
+    if (cent.head.y === -(game.map.height - 1)) cent.next_up = true;
     else cent.head.y -= speed;
     cent.direction *= -1;
   } else {
@@ -86,12 +88,19 @@ export const move_centipedes = (speed: number, cent: CENTIPEDE, map: MAP) => {
   }
 
   if (!cent.spheres) return;
+  const p_x = Math.round(game.player_data.pos.x);
+  const p_y = Math.round(game.player_data.pos.y);
+  const p_a = game.player_data.dead;
   cent.spheres.forEach((s, i) => {
     let pos: Vector3;
     if (i === 0) pos = cent.head;
     else pos = cent?.tail?.[i - 1] ?? new Vector3(0, 0, 0);
     s.position.x = pos.x;
     s.position.y = pos.y;
+
+    if (pos.x === p_x && pos.y === p_y && p_a === 0) {
+      game.player_data.dead = 1;
+    }
   });
 };
 
@@ -121,6 +130,7 @@ export const update_centipedes = (game: GAME) => {
       // if we shot the last sphere, remove the whole centipede
       scene.remove(cent.spheres?.[0] as THREE.Mesh);
       centipedes.splice(cent_index, 1);
+      game.score += 90;
     }
   } else {
     // if we shot a sphere in the middle, split the centipede in two

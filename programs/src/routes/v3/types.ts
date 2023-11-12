@@ -26,6 +26,7 @@ export interface PLAYER {
   pos: THREE.Vector3;
   follow: boolean;
   limits: { x1: number; x2: number; y1: number; y2: number };
+  dead: number;
 }
 
 export interface BULLETS {
