@@ -237,12 +237,12 @@
     vec2(0.0, 1.0),
     vec2(0.0, 0.0),
     // Mynsturhnit fyrir gólf
-    vec2(0.0, 0.0),
-    vec2(10.0, 0.0),
-    vec2(10.0, 10.0),
-    vec2(10.0, 10.0),
-    vec2(0.0, 10.0),
-    vec2(0.0, 0.0),
+    vec2(-1.0, 0.0),
+    vec2(1.0, 0.0),
+    vec2(1.0, 2.0),
+    vec2(1.0, 2.0),
+    vec2(-1.0, 2.0),
+    vec2(-1.0, 0.0),
   ];
 
   const buffer = (
@@ -313,8 +313,8 @@
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.uniform1i(gl.getUniformLocation(prog, "texture"), 0);
 
     proLoc = gl.getUniformLocation(prog, "projection");
