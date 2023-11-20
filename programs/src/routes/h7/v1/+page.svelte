@@ -5,6 +5,7 @@
   import { GUI } from "lil-gui";
 
   let container: HTMLDivElement;
+  let gui_element: HTMLDivElement;
   onMount(() => {
     create_scene(container);
   });
@@ -80,7 +81,7 @@
     plane.receiveShadow = true;
     scene.add(plane);
 
-    const gui = new GUI();
+    const gui = new GUI({ container: gui_element });
 
     const light_1 = new THREE.PointLight(
       lights.light_1_color,
@@ -162,6 +163,19 @@
         light_2.position.z = v;
       });
 
+    const ball_folder = gui.addFolder("Ball");
+    ball_folder.add(ball.position, "x", -10, 10, 0.1).onChange((v: number) => {
+      ball.position.x = v;
+    });
+    ball_folder.add(
+      {
+        "Launch Ball": () => {
+          velocity += 0.3;
+        },
+      },
+      "Launch Ball"
+    );
+
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.update();
 
@@ -175,6 +189,18 @@
   };
 </script>
 
-<div id="container" bind:this={container} />
-<button on:click={() => (velocity += 0.3)}>Launch ball</button>
-<div id="gui" />
+<section>
+  <div id="container" bind:this={container} />
+  <div id="gui" bind:this={gui_element} />
+</section>
+
+<style>
+  section {
+    display: flex;
+    gap: 1em;
+  }
+
+  .controls {
+    width: 200px;
+  }
+</style>

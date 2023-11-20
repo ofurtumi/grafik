@@ -2,6 +2,7 @@
   const alt_names: { [key: string]: string } = {
     v1: "Frogger",
     v2: "Fiskar",
+    v3: "Centipede",
     test: "MV.ts",
     "boid-test": "2D boids",
   };
