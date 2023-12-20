@@ -85,6 +85,14 @@
     Base fær vörpunina $R_b$,
     lower arm fær hliðrun og snúning útfrá base ásamt eigin snúning: $R_b T_"b-height" R_l$,
     upper arm fær hliðrun og snúning útfrá base og la ásamt eigin snúning: $R_b T_"b-heigth" R_l T_"l-height" R_u$
+    ```ts
+    mvm = rotateY(theta[Base]);
+    base(gl);
+    // BH = 2 (base height)
+    mvm *= translate((0.0, BH, 0.0)))
+    mvm *= rotateZ(theta[LowerArm])
+    lowerArm(gl);
+    ```
   ]
 )
 
@@ -189,12 +197,15 @@
   ]
 )
 
-#rect(figure(image("../imgs/prof_matrix_multi.png"), caption: "Margföldun fylkja", outlined: true))
+#note(
+  [Margföldun fylkja],
+  align(center)[#image("../imgs/prof_matrix_multi.png", width: 75%)]
+)
 
-#rect(
+#note(
+  align(center)[Tveir ljósgjafar, engin dofnun],
   stack(
     spacing: 6pt,
-    align(center)[Tveir ljósgjafar, engin dofnun],
     figure(
       image("../imgs/prof_ljos_1.png", width: 80%),
       caption: "Bjartasta dreifendurskin væri undir báðum ljósgjöfum, fjarlægð skiptir ekki máli"
@@ -207,6 +218,7 @@
       image("../imgs/prof_ljos_3.png", width: 80%),
       caption: [Fyrir áhorfanda í $l_2$ er svipuð staða, frá $l_2$ beint undir $l_2$ og frá $l_1$ til hliðar við miðju: $r_1 dot l_1 = 1$]
     ),
+    [],
     [Ef það væri dofnun væri bjartasti punktur séð frá $l_1$ beint undir og frá $l_2$ örlítið til hliðar við miðju.]
   )
 )
